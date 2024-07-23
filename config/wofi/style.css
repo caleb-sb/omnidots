@@ -1,0 +1,61 @@
+/* ::root{ */
+/*     --accent: #5291e2; */
+/*     --dark: #383C4A; */
+/*     --light: #7C818C; */
+/*     --ld: #404552; */
+/*     --dl: #4B5162 */
+/*     --white: white; */
+/* } */
+
+* {
+  font-family: JetBrainsMono Nerd Font;
+}
+
+window {
+  background-color: #24283b;
+  border: 2px solid #7aa2f7;
+  border-radius: 15px;
+}
+
+#input {
+  border: none;
+  border-bottom: 1px solid #292e42;
+  background-color: #24283b;
+  color: #c0caf5;
+  padding: 8px;
+  margin-bottom: 24px;
+}
+
+#inner-box {
+  background-color: #24283b;
+}
+
+#outer-box {
+  margin: 5px;
+  padding: 20px;
+  background-color: #24283b;
+}
+
+#scroll {
+}
+
+#img {
+  margin-right: 8px;
+}
+
+#text {
+  padding: 5px;
+  color: #c0caf5;
+}
+
+#entry:selected {
+  background-color: #2e3c64;
+}
+
+#entry {
+  padding: 8px;
+  border-radius: 15px;
+}
+
+#text:selected {
+}
