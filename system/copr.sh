@@ -11,6 +11,7 @@ COPR_REPOS=(
   solopasha/hyprland
   erikreider/SwayNotificationCenter
   atim/starship
+  atim/lazygit
 )
 
 # Function to add dnf config if not present in a file

@@ -69,9 +69,8 @@ hypr=(
 
 dev=(
   cargo
-  go
+  golang
   lazygit
-  prettierd
   python3
   tree-sitter
 )
