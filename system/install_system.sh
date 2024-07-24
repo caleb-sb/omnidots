@@ -25,7 +25,7 @@ utils=(
   dunst # notifications
   gawk
   grim # screenshots
-  imagemagick
+  ImageMagick
   inxi # cpu, battery info
   gvfs # something about virtual mounts (idk)
   gvfs-mtp
