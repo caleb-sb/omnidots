@@ -93,7 +93,6 @@ audio=(
 apps=(
   meld
   obs-studio
-  spotify
   vlc
 )
 
