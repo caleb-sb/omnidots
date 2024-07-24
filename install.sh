@@ -29,10 +29,7 @@ execute_script() {
   fi
 }
 
-execute_script "notnix/install_system.sh"
-execute_script "notnix/install_fonts.sh"
-execute_script "notnix/copy_config.sh"
-execute_script "notnix/install_apps.sh"
+execute_script "system/install_system.sh"
 
 echo "$(tput setaf 2)[SUCCESS]: Installation complete$(tput sgr0)"
 echo "It is recommended to reboot your pc."
