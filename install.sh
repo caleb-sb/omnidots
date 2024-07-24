@@ -5,7 +5,7 @@ if [[ $EUID -eq 0 ]]; then
   exit 1
 fi
 
-echo "$(tput setaf 166)[WARNING]$(tput sgr0): It is expected that this script is run"
+echo "$(tput setaf 166)[WARNING]$(tput sgr0): It is expected that this script is run on a fresh install of Fedora Minimal."
 
 read -p "$(tput setaf 6)Begin Hypr-Fedora Installation? (y/n): $(tput sgr0)" proceed
 
