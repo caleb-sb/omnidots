@@ -29,6 +29,7 @@ execute_script() {
   fi
 }
 
+execute_script "system/copr.sh"
 execute_script "system/install_system.sh"
 
 echo "$(tput setaf 2)[SUCCESS]: Installation complete$(tput sgr0)"
