@@ -72,7 +72,6 @@ dev=(
   golang
   lazygit
   python3
-  tree-sitter
 )
 
 thunar=(
