@@ -57,10 +57,6 @@ utils=(
   yad # dialogs from scripts
 )
 
-fonts=(
-  jetbrains-mono-fonts
-)
-
 hypr=(
   hyprland
   hyprlock
@@ -72,6 +68,7 @@ dev=(
   golang
   lazygit
   python3
+  nodejs
 )
 
 thunar=(
