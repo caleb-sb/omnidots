@@ -31,6 +31,9 @@ execute_script() {
 
 execute_script "system/copr.sh"
 execute_script "system/install_system.sh"
+execute_script "system/fonts.sh"
+execute_script "system/fish.sh"
+execute_script "system/pnpm.sh"
 
 echo "$(tput setaf 2)[SUCCESS]: Installation complete$(tput sgr0)"
 echo "It is recommended to reboot your pc."
