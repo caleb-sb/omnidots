@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-wget -qO- https://get.pnpm.io/install.sh | sh -
+wget2 -qO- https://get.pnpm.io/install.sh | sh -
