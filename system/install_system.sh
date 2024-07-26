@@ -123,4 +123,4 @@ for PKG1 in "${utils[@]}" "${terminal[@]}" "${bluetooth[@]}" "${hypr[@]}" "${fon
 done
 
 # Copy configurations
-cp -rp ./config/ ~/.config
+cp -rf ./config/. ~/.config
