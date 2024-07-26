@@ -25,7 +25,7 @@ status is-interactive; and begin
 
     # Interactive shell initialisation
     if test "$TERM" != dumb
-        eval (/home/caleb/.nix-profile/bin/starship init fish)
+        eval (starship init fish)
 
     end
 
