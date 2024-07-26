@@ -61,7 +61,7 @@
     "persistent-workspaces": {},
   },
   "hyprland/window": {
-    "format": " 󱄅 {}",
+    "format": "  {}",
     "separate-outputs": true,
     "rewrite": {
       "caleb@archway:(.*)": "$1 ",
