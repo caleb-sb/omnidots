@@ -1,0 +1,6 @@
+[alias]
+  up = "!git remote update -p; git merge --ff-only @{u}"
+
+[user]
+  email = "caleb@email.com"
+  name = "Caleb"
