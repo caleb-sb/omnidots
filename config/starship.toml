@@ -1,0 +1,30 @@
+format = "[▒▓](fg:white)[ 󱄅 ](inverted fg:white)[](bg:blue fg:white)$directory[](bg:bright-black fg:blue)$git_branch$git_status[](fg:bright-black bg:black)$nodejs$rust$golang[](fg:black)\n$character"
+[directory]
+format = "[ $path ]($style)"
+style = "inverted fg:blue"
+truncation_length = 3
+truncation_symbol = "…/"
+
+[directory.substitutions]
+Downloads = ""
+Pictures = " "
+workspace = ""
+
+[git_branch]
+format = "[ $symbol $branch ]($style)"
+style = "bg:bright-black fg:blue"
+symbol = ""
+
+[git_status]
+format = "[$all_status$ahead_behind]($style)"
+style = "bg:bright-black fg:blue"
+
+[golang]
+format = "[ $symbol ($version) ]($style)"
+style = "bg:black fg:cyan"
+symbol = ""
+
+[nodejs]
+format = "[ $symbol ($version) ]($style)"
+style = "bg:black fg:cyan"
+symbol = ""
