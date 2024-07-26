@@ -91,6 +91,8 @@ apps=(
   meld
   obs-studio
   vlc
+  firefox
+  brave-browser
 )
 
 # Function for installing packages
