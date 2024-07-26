@@ -68,7 +68,6 @@ dev=(
   golang
   lazygit
   python3
-  nodejs
 )
 
 thunar=(
