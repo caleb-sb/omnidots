@@ -30,7 +30,9 @@ execute_script() {
 }
 
 execute_script "system/copr.sh"
+execute_script "system/fedora.sh"
 execute_script "system/install_system.sh"
+execute_script "system/flathub.sh"
 execute_script "system/fonts.sh"
 execute_script "system/pnpm.sh"
 
