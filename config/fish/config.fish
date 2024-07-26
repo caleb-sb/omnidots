@@ -2,6 +2,23 @@
 set -q __fish_home_manager_config_sourced; and exit
 set -g __fish_home_manager_config_sourced 1
 
+function setup_hm_session_vars
+    # Only source this once.
+    if [ -n "$__HM_SESS_VARS_SOURCED" ]
+        return
+    end
+    set -gx __HM_SESS_VARS_SOURCED 1
+    set -gx EDITOR nvim
+    set -gx GTK2_RC_FILES '/home/caleb/.gtkrc-2.0'
+    set -gx QT_QPA_PLATFORMTHEME qt5ct
+    set -gx QT_STYLE_OVERRIDE kvantum
+    set -gx XDG_CACHE_HOME '/home/caleb/.cache'
+    set -gx XDG_CONFIG_HOME '/home/caleb/.config'
+    set -gx XDG_DATA_HOME '/home/caleb/.local/share'
+    set -gx XDG_STATE_HOME '/home/caleb/.local/state'
+end
+setup_hm_session_vars
+
 set fish_greeting
 
 status is-login; and begin
