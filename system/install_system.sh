@@ -54,7 +54,8 @@ utils=(
   xdg-utils
   xdg-desktop-portal-hyprland
   xdg-desktop-portal-gtk
-  yad # dialogs from scripts
+  xhost # polkit-gnome -> gparted wont work otherwise
+  yad   # dialogs from scripts
 )
 
 hypr=(
