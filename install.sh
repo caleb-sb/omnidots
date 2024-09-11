@@ -37,6 +37,7 @@ execute_script "system/gtk.sh"
 execute_script "system/fonts.sh"
 execute_script "system/pnpm.sh"
 execute_script "system/applications.sh"
+execute_script "system/nvidia.sh"
 
 echo "$(tput setaf 2)[SUCCESS]: Installation complete$(tput sgr0)"
 echo "It is recommended to reboot your pc."
