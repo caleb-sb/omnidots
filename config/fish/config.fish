@@ -42,7 +42,7 @@ status is-interactive; and begin
 
     # Interactive shell initialisation
     if test "$TERM" != dumb
-        eval (starship init fish)
+        starship init fish | source
 
     end
 
