@@ -5,6 +5,7 @@ terminal=(
   kitty
   eza
   fish
+  fzf
   less
   tree
   nano
