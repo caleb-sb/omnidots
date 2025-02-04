@@ -10,14 +10,14 @@ nvidia_pkg=(
 # Function for installing packages
 install_package() {
   # Checking if package is already installed
-  if sudo dnf list installed "$1" &>>/dev/null; then
+  if sudo dnf list --installed "$1" &>>/dev/null; then
     echo -e "$1 is already installed. Skipping..."
   else
     # Package not installed
     echo -e "Installing $1 ..."
     sudo dnf install -y "$1" 2>&1
     # Making sure package is installed
-    if sudo dnf list installed "$1" &>>/dev/null; then
+    if sudo dnf list --installed "$1" &>>/dev/null; then
       echo -e "$1 was installed."
     else
       # Something is missing, exiting to review log
