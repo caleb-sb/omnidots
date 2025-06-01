@@ -25,20 +25,14 @@ status is-login; and begin
 
     # Login shell initialisation
 
-
 end
 
 status is-interactive; and begin
 
     # Abbreviations
 
-
     # Aliases
-    alias l 'eza -lh --icons=auto'
-    alias ld 'eza -lhD --icons=auto'
     alias lg lazygit
-    alias ll 'eza -lha --icons=auto --sort=name --group-directories-first'
-    alias ls 'eza -1'
 
     # Interactive shell initialisation
     if test "$TERM" != dumb

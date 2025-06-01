@@ -2,7 +2,6 @@
 
 terminal=(
   bat
-  eza
   fish
   fzf
   kitty
@@ -123,6 +122,10 @@ install_package() {
   fi
 }
 
+# Copy configurations
+mkdir -p ~/.config
+ln -s ~/omnidots/config/* ~/.config
+
 # Actual loops for installations
 for PKG1 in "${utils[@]}" "${terminal[@]}" "${bluetooth[@]}" "${hypr[@]}" "${fonts[@]}" "${dev[@]}" "${thunar[@]}" "${audio[@]}" "${apps[@]}" "${gaming[@]}"; do
   install_package "$PKG1" 2>&1
@@ -131,6 +134,3 @@ for PKG1 in "${utils[@]}" "${terminal[@]}" "${bluetooth[@]}" "${hypr[@]}" "${fon
     exit 1
   fi
 done
-
-# Copy configurations
-ln -s ~/omnidots/config/* ~/.config
