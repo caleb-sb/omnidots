@@ -35,7 +35,7 @@ execute_script "system/install_system.sh"
 execute_script "system/flathub.sh"
 execute_script "system/gtk.sh"
 execute_script "system/fonts.sh"
-execute_script "system/pnpm.sh"
+execute_script "system/js-dev.sh"
 execute_script "system/applications.sh"
 execute_script "system/nvidia.sh"
 

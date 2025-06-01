@@ -63,6 +63,8 @@ hypr=(
   hyprland
   hyprlock
   hyprcursor
+  hyprpolkitagent
+  hyprpaper
 )
 
 dev=(
