@@ -2,15 +2,15 @@
 
 terminal=(
   bat
-  kitty
   eza
   fish
   fzf
+  kitty
   less
-  tree
   nano
   neovim
   starship
+  tree
 )
 
 bluetooth=(
@@ -36,14 +36,12 @@ utils=(
   network-manager-applet
   openssl
   parallel
-  mate-polkit # auth reqs
   qt5ct
   qt6ct
   qt6-qtsvg
   ripgrep
   slurp  # select region in wayland (screenshots)
   swappy # screenshot editing
-  swww   # wallpaper management
   unzip
   usbutils #usb things
   waybar
@@ -91,11 +89,18 @@ audio=(
 )
 
 apps=(
+  brave-browser
+  firefox
+  inkscape
   meld
   obs-studio
+  podman
   vlc
-  firefox
-  brave-browser
+)
+
+gaming=(
+  steam
+  discord
 )
 
 # Function for installing packages
@@ -119,7 +124,7 @@ install_package() {
 }
 
 # Actual loops for installations
-for PKG1 in "${utils[@]}" "${terminal[@]}" "${bluetooth[@]}" "${hypr[@]}" "${fonts[@]}" "${dev[@]}" "${thunar[@]}" "${audio[@]}" "${apps[@]}"; do
+for PKG1 in "${utils[@]}" "${terminal[@]}" "${bluetooth[@]}" "${hypr[@]}" "${fonts[@]}" "${dev[@]}" "${thunar[@]}" "${audio[@]}" "${apps[@]}" "${gaming[@]}"; do
   install_package "$PKG1" 2>&1
   if [ $? -ne 0 ]; then
     echo -e "$PKG1 Package installation failed, Please check the installation logs"
@@ -128,4 +133,4 @@ for PKG1 in "${utils[@]}" "${terminal[@]}" "${bluetooth[@]}" "${hypr[@]}" "${fon
 done
 
 # Copy configurations
-cp -rf ./config/. ~/.config
+ln -s ~/omnidots/config/* ~/.config
