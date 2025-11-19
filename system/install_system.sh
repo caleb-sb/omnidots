@@ -62,6 +62,7 @@ hypr=(
   hyprcursor
   hyprpolkitagent
   hyprpaper
+  hyprland-qtutils
 )
 
 dev=(
