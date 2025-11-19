@@ -66,7 +66,6 @@ hypr=(
 )
 
 dev=(
-  cargo
   golang
   lazygit
   python3
