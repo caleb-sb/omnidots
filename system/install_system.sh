@@ -9,6 +9,7 @@ terminal=(
   nano
   neovim
   starship
+  tmux
   tree
 )
 
