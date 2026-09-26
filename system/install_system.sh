@@ -30,7 +30,7 @@ utils=(
   inxi # cpu, battery info
   gvfs # something about virtual mounts (idk)
   gvfs-mtp
-  jq     #json parsing (waybar i think)
+  jq     #json parsing
   kanshi # monitor management
   kvantum
   network-manager-applet
@@ -44,7 +44,6 @@ utils=(
   swappy # screenshot editing
   unzip
   usbutils #usb things
-  waybar
   wget2
   wl-clipboard
   wofi
@@ -63,6 +62,7 @@ hypr=(
   hyprpolkitagent
   hyprpaper
   hyprland-qtutils
+  quickshell # bar, notifications, power menu (config/qs-bar)
 )
 
 dev=(

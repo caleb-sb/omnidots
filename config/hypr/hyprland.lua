@@ -12,6 +12,17 @@ file    = "thunar"
 term    = "kitty"
 mainMod = "SUPER"
 
+------------------
+---- MONITORS ----
+------------------
+
+hl.monitor({
+    output   = "DP-2",
+    mode     = "3840x2160@144",
+    position = "0x0",
+    scale    = 1.5,
+})
+
 -------------------------------
 ---- ENVIRONMENT VARIABLES ----
 -------------------------------
@@ -45,8 +56,8 @@ hl.config({
 
         blur = {
             enabled = true,
-            passes  = 1,
-            size    = 5,
+            passes  = 2,
+            size    = 3,
         },
 
         shadow = {
@@ -120,12 +131,13 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("nm-applet --indicator")
     hl.exec_cmd("systemctl --user start hyprpolkitagent")
     hl.exec_cmd("kanshi")
-    hl.exec_cmd("waybar")
+    hl.exec_cmd("qs -p ~/.config/qs-bar")
     hl.exec_cmd("hyprpaper")
     hl.exec_cmd("gsettings set org.gnome.desktop.interface icon-theme 'Tela-circle-purple-dark'")
     hl.exec_cmd("gsettings set org.gnome.desktop.interface cursor-theme 'Bibata-Modern-Ice'")
     hl.exec_cmd("gsettings set org.gnome.desktop.interface font-name 'FreeSans'")
     hl.exec_cmd("gsettings set org.gnome.desktop.interface gtk-theme 'Andromeda-dark'")
+    hl.exec_cmd("gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'")
     hl.exec_cmd("wl-paste --type text --watch cliphist store")
     hl.exec_cmd("wl-paste --type image --watch cliphist store")
 end)

@@ -45,3 +45,15 @@ hl.window_rule({
     max_size         = { 1, 1 },
     no_blur          = true,
 })
+
+---- qs-bar ----
+
+-- Blur behind the see-through bar. ignore_alpha skips the empty, fully
+-- transparent part of the bar's window (where popouts open).
+hl.layer_rule({
+    name  = "qs-bar-blur",
+    match = { namespace = "^(qs-bar)$" },
+
+    blur         = true,
+    ignore_alpha = 0.2,
+})

@@ -53,11 +53,17 @@ status is-interactive; and begin
 end
 
 # pnpm
-set -gx PNPM_HOME "/home/caleb/.local/share/pnpm"
-if not string match -q -- $PNPM_HOME $PATH
-    set -gx PATH "$PNPM_HOME" $PATH
+set -gx PNPM_HOME '/home/caleb/.local/share/pnpm'
+if not string match -q -- "$PNPM_HOME/bin" $PATH
+  set -gx PATH "$PNPM_HOME/bin" $PATH
 end
 # pnpm end
+
+# Node installed by `pnpm env` is linked in $PNPM_HOME itself, which the pnpm 12
+# installer no longer adds to PATH (it only adds $PNPM_HOME/bin).
+if not contains -- "$PNPM_HOME" $PATH
+  set -gx PATH "$PNPM_HOME" $PATH
+end
 
 # bun
 set --export BUN_INSTALL "$HOME/.bun"

@@ -3,3 +3,5 @@
 -- Add any additional options here
 vim.opt.wrap = true
 vim.opt.colorcolumn = "80"
+
+vim.g.lazyvim_prettier_needs_config = true

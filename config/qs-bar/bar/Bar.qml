@@ -4,6 +4,7 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
 import Quickshell.Hyprland
+import Quickshell.Services.SystemTray
 import qs.config
 import qs.components
 import qs.modules.bluetooth
@@ -15,6 +16,7 @@ import qs.modules.display
 import qs.modules.clock
 import qs.modules.workspaces
 import qs.modules.system
+import qs.modules.tray
 
 // The bar. The window is taller than the bar so popouts can live in it;
 // the input mask limits clicks to the bar strip and the open card.
@@ -25,6 +27,10 @@ Variants {
         id: win
 
         required property ShellScreen modelData
+
+        // Menu shown by the tray popout (set just before it opens).
+        property QsMenuHandle trayMenu
+        property string trayTitle
 
         screen: modelData
         anchors {
@@ -220,6 +226,37 @@ Variants {
                 anchors.verticalCenter: parent.verticalCenter
                 spacing: Theme.spacing.large
 
+                // Tray apps (hidden when there are none).
+                BarGroup {
+                    id: trayGroup
+
+                    // Tray icons for things the bar already has a module for.
+                    readonly property list<string> hidden: ["nm-applet", "blueman"]
+
+                    visible: trayRepeater.count > 0
+
+                    Repeater {
+                        id: trayRepeater
+
+                        model: ScriptModel {
+                            values: SystemTray.items.values.filter(i => !trayGroup.hidden.includes(i.id))
+                        }
+
+                        TrayItem {
+                            id: trayItem
+
+                            readonly property string popoutName: "tray:" + modelData.id
+
+                            active: popout.open && popout.current === popoutName
+                            onMenuRequested: {
+                                win.trayMenu = modelData.menu;
+                                win.trayTitle = modelData.tooltipTitle || modelData.title || modelData.id;
+                                popout.toggle(popoutName, trayItem, trayMenuPanel);
+                            }
+                        }
+                    }
+                }
+
                 // Display tools.
                 BarGroup {
                     ScaleIcon {}
@@ -264,6 +301,16 @@ Variants {
                         onClicked: popout.toggle("notifications", notifIcon, notifPanel)
                     }
                 }
+            }
+        }
+
+        Component {
+            id: trayMenuPanel
+
+            TrayMenuPanel {
+                handle: win.trayMenu
+                title: win.trayTitle
+                onCloseRequested: popout.close()
             }
         }
 

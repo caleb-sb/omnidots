@@ -12,6 +12,7 @@ COPR_REPOS=(
   erikreider/SwayNotificationCenter
   atim/starship
   atim/lazygit
+  errornointernet/quickshell
 )
 
 # Function to add dnf config if not present in a file
