@@ -5,7 +5,8 @@
 #
 # Inputs, overridable so tests can feed in recorded machines:
 #   OMNIDOTS_LSPCI_FILE  recorded `lspci -n` output (default: run `lspci -n`)
-#   OMNIDOTS_SYSFS_ROOT  sysfs root (default: /sys)
+#   OMNIDOTS_SYSFS_ROOT  sysfs root (default: /sys), also read for the Secure
+#                        Boot state
 #
 # A HAS_* variable already set in the environment (to 0 or 1) overrides
 # detection.
@@ -19,7 +20,8 @@ declare -A GPU_VENDOR_IDS=(
 
 # Display order for the confirmation prompt and the plan.
 # shellcheck disable=SC2034 # read by install.sh
-CAPABILITY_FLAGS=(HAS_NVIDIA HAS_AMD_GPU HAS_INTEL_GPU)
+CAPABILITY_FLAGS=(HAS_NVIDIA HAS_AMD_GPU HAS_INTEL_GPU HAS_LEGACY_INTEL_GPU
+  HAS_HYBRID_GPU)
 
 # pci_devices — `lspci -n` style lines: "<slot> <class>: <vendor>:<device>".
 # Falls back to sysfs when lspci isn't installed (Minimal lacks pciutils).
@@ -40,9 +42,50 @@ pci_devices() {
   fi
 }
 
-# gpu_vendors — vendor IDs of PCI display-class (03xx) devices, one per line.
-gpu_vendors() {
-  pci_devices | awk '$2 ~ /^03/ { split($3, id, ":"); print id[1] }'
+# gpu_devices — PCI display-class (03xx) devices, one per line, as
+# "<domain:bus:dev.fn> <vendor> <device> <class>". lspci -n omits the domain;
+# it's 0000.
+gpu_devices() {
+  pci_devices | awk '$2 ~ /^03/ {
+    slot = $1
+    if (split(slot, parts, ":") == 2) slot = "0000:" slot
+    split($3, id, ":")
+    print slot, id[1], id[2], substr($2, 1, 4)
+  }'
+}
+
+# is_legacy_intel_gpu <device-id> — true for Intel GPUs that intel-media-driver
+# doesn't support: everything before Broadwell, plus Braswell/Cherry View
+# (see https://github.com/intel/media-driver#supported-platforms). Those use
+# libva-intel-driver instead. The set is closed, so it's listed here and any
+# other Intel GPU counts as modern. Ranges checked against the PCI ID database
+# (pci.ids).
+is_legacy_intel_gpu() {
+  case "$1" in
+    # i8xx, GMA 900/950/3000/X3100/4500, Pineview
+    1132 | 1240 | 1a12 | 25?? | 27?? | 29?? | 2a?? | 2e?? | 3577 | 358? | 712[135] | a0[01]?) ;;
+    # Ironlake, Sandy Bridge, Ivy Bridge
+    004[26a] | 01??) ;;
+    # Haswell; 0a84 is Broxton (Gen9), so only 0a0x-0a2x
+    04?? | 0a[012]? | 0c?? | 0d??) ;;
+    # Bay Trail, older Atoms, Braswell/Cherry View
+    0f3? | 080d | 08cf | 0be? | 22b?) ;;
+    *) return 1 ;;
+  esac
+}
+
+# gpus_integrated_first — the slots from gpu_devices, integrated GPUs first:
+# Intel, then AMD, then everything else, each in bus order.
+gpus_integrated_first() {
+  gpu_devices | awk '{ print ($2 == "8086" ? 0 : $2 == "1002" ? 1 : 2), $1 }' |
+    sort -s -n -k1,1 | cut -d' ' -f2
+}
+
+# secure_boot_enabled — true when UEFI Secure Boot is on. The SecureBoot EFI
+# variable is 4 attribute bytes followed by one data byte, 1 when enabled.
+secure_boot_enabled() {
+  local var="${OMNIDOTS_SYSFS_ROOT:-/sys}/firmware/efi/efivars/SecureBoot-8be4df61-93ca-11d2-aa0d-e39d0f1c1e1f"
+  [[ -r $var ]] && [[ $(od -An -tu1 -j4 -N1 "$var" | tr -d ' ') == 1 ]]
 }
 
 # set_flag <HAS_*> <0|1> — export the detected value unless overridden.
@@ -57,8 +100,9 @@ set_flag() {
 }
 
 detect_capabilities() {
-  local vendors flag
-  vendors="$(gpu_vendors)"
+  local gpus vendors flag vendor device legacy=0 hybrid=0
+  gpus="$(gpu_devices)"
+  vendors="$(cut -d' ' -f2 <<<"$gpus")"
   for flag in "${!GPU_VENDOR_IDS[@]}"; do
     if grep -qx "${GPU_VENDOR_IDS[$flag]}" <<<"$vendors"; then
       set_flag "$flag" 1
@@ -66,4 +110,23 @@ detect_capabilities() {
       set_flag "$flag" 0
     fi
   done
+
+  while read -r _ vendor device _; do
+    if [[ $vendor == 8086 ]] && is_legacy_intel_gpu "$device"; then
+      legacy=1
+    fi
+  done <<<"$gpus"
+  set_flag HAS_LEGACY_INTEL_GPU "$legacy"
+
+  # Hybrid: a discrete GPU with no display outputs (class 0302, 3D controller)
+  # next to an Intel or AMD GPU that drives the screens. That's a muxless
+  # laptop, where the dGPU should sleep when idle. A card that reports 0300
+  # (VGA) has outputs of its own, as on a desktop, so it doesn't count. MUX
+  # laptops whose dGPU reports 0300 need HAS_HYBRID_GPU=1.
+  if awk '$4 == "0302" { dgpu = 1 }
+    $4 != "0302" && ($2 == "8086" || $2 == "1002") { igpu = 1 }
+    END { exit !(dgpu && igpu) }' <<<"$gpus"; then
+    hybrid=1
+  fi
+  set_flag HAS_HYBRID_GPU "$hybrid"
 }

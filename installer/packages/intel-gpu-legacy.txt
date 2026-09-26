@@ -1,0 +1,4 @@
+# Intel GPUs older than Broadwell, plus Braswell (HAS_LEGACY_INTEL_GPU=1).
+# The GPU module also swaps Mesa's VA drivers for the freeworld build.
+
+libva-intel-driver    # VA-API (i965)

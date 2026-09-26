@@ -10,13 +10,30 @@ selection) into my Hyprland desktop.
 ./install.sh --dry-run  # print the plan, one action per line; change nothing
 ```
 
-The installer detects hardware capabilities (`HAS_NVIDIA`, `HAS_AMD_GPU`,
-`HAS_INTEL_GPU`) and shows them before doing anything. Force any flag with an
-environment variable of the same name:
+The installer detects hardware capabilities and shows them before doing
+anything:
+
+- `HAS_NVIDIA`, `HAS_AMD_GPU`, `HAS_INTEL_GPU`: a GPU from that vendor
+- `HAS_LEGACY_INTEL_GPU`: the Intel GPU predates Broadwell (or is Braswell),
+  so it gets `libva-intel-driver` instead of `intel-media-driver`
+- `HAS_HYBRID_GPU`: a discrete GPU without display outputs (PCI class 0302,
+  3D controller) next to an Intel or AMD GPU, as on muxless laptops. With
+  NVIDIA this enables runtime power management. A card that reports as a VGA
+  controller (0300), like a desktop card, doesn't count; set
+  `HAS_HYBRID_GPU=1` on a MUX laptop whose dGPU reports 0300.
+
+Force any flag with an environment variable of the same name:
 
 ```sh
 HAS_NVIDIA=0 ./install.sh --dry-run
 ```
+
+On NVIDIA machines the installer installs `akmod-nvidia`, CUDA and the VA-API
+driver, and waits for akmods to build the kernel module before it finishes.
+It doesn't edit the kernel command line. With Secure Boot on, it creates the
+akmods signing key and queues it with `mokutil --import`, which asks for a
+one-time password. At the next boot, choose Enroll MOK in the blue MOK
+manager and enter that password, or the NVIDIA module won't load.
 
 Layout:
 

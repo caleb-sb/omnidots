@@ -1,0 +1,6 @@
+# NVIDIA GPUs (HAS_NVIDIA=1), from RPM Fusion nonfree. akmod-nvidia builds the
+# kernel module for each kernel; the NVIDIA module waits for the first build.
+
+akmod-nvidia
+xorg-x11-drv-nvidia-cuda   # CUDA libraries and nvidia-smi
+libva-nvidia-driver        # VA-API on NVDEC

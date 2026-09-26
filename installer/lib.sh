@@ -4,8 +4,9 @@
 # execute it.
 #
 # Dry-run: with DRY_RUN=1 nothing is executed. Every action prints one plan
-# line to stdout instead, as `<kind>: <detail>` (flag, conf, repo, pkg, backup,
-# link, run). The tests assert on these lines, so keep the format stable.
+# line to stdout instead, as `<kind>: <detail>` (flag, conf, repo, pkg, swap,
+# backup, link, run, wait, gpu-order). The tests assert on these lines, so
+# keep the format stable.
 # Logging goes to stderr so it never mixes with the plan.
 
 OMNIDOTS_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -59,13 +60,23 @@ install_packages() {
   sudo dnf install -y "$@"
 }
 
-# install_package_list <name> — install packages/<name>.txt in one transaction.
-# Lists hold one package per line; `#` starts a comment.
-install_package_list() {
+# package_list <name> — print the packages in packages/<name>.txt, one per
+# line. Lists hold one package per line; `#` starts a comment.
+package_list() {
   local file="$PACKAGES_DIR/$1.txt"
   [[ -f $file ]] || die "Package list not found: $file"
-  local -a pkgs
-  mapfile -t pkgs < <(awk '{ sub(/#.*/, "") } NF { print $1 }' "$file")
-  log_info "Installing the $1 package list (${#pkgs[@]} packages)"
+  awk '{ sub(/#.*/, "") } NF { print $1 }' "$file"
+}
+
+# install_package_list <name...> — install the named lists in one transaction.
+install_package_list() {
+  local -a pkgs=()
+  local name list
+  for name in "$@"; do
+    list="$(package_list "$name")"
+    [[ -n $list ]] || continue
+    mapfile -t -O "${#pkgs[@]}" pkgs <<<"$list"
+  done
+  log_info "Installing the $* package list${2:+s} (${#pkgs[@]} packages)"
   install_packages "${pkgs[@]}"
 }
