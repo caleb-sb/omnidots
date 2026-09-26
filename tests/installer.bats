@@ -14,7 +14,9 @@ setup() {
 plan_for() {
   local fixture="$1"
   shift
+  mkdir -p "$BATS_TEST_TMPDIR/home"
   run --separate-stderr env -u HAS_NVIDIA -u HAS_AMD_GPU -u HAS_INTEL_GPU \
+    -u XDG_CONFIG_HOME -u XDG_DATA_HOME HOME="$BATS_TEST_TMPDIR/home" \
     OMNIDOTS_SYSFS_ROOT="$FIXTURES/$fixture/sysfs" \
     OMNIDOTS_LSPCI_FILE="$FIXTURES/$fixture/lspci.txt" \
     "$@" "$REPO_ROOT/install.sh" --dry-run
@@ -69,6 +71,17 @@ repo: copr:errornointernet/quickshell" ]
     waybar starship lazygit; do
     refute_line "pkg: $pkg"
   done
+}
+
+@test "plans linking the dotfiles into a fresh HOME and changes nothing" {
+  plan_for desktop
+  [ "$status" -eq 0 ]
+  local home="$BATS_TEST_TMPDIR/home"
+  assert_line "link: $home/.config/hypr -> $REPO_ROOT/config/hypr"
+  assert_line "link: $home/.config/fish -> $REPO_ROOT/config/fish"
+  assert_line "link: $home/.config/starship.toml -> $REPO_ROOT/config/starship.toml"
+  assert_line "link: $home/.local/share/applications/nvim.desktop -> $REPO_ROOT/applications/nvim.desktop"
+  [ -z "$(ls -A "$home")" ]
 }
 
 @test "an environment variable overrides a detected flag" {
