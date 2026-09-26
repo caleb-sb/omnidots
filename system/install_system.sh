@@ -47,7 +47,6 @@ utils=(
   waybar
   wget2
   wl-clipboard
-  wlogout
   wofi
   xdg-user-dirs
   xdg-utils
