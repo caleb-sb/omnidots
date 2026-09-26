@@ -1,44 +1,52 @@
 #!/usr/bin/env bash
 #
-if [[ $EUID -eq 0 ]]; then
-  echo "This script should not be executed as root! Exiting......."
-  exit 1
+# Turns a Fedora Minimal install into this Hyprland desktop.
+#
+# Usage: ./install.sh [--dry-run]
+#   --dry-run  print the plan to stdout, one action per line, and change nothing
+#
+# Any capability flag can be forced with an environment variable of the same
+# name, e.g. HAS_NVIDIA=0 ./install.sh
+
+set -euo pipefail
+
+cd "$(dirname "${BASH_SOURCE[0]}")"
+# shellcheck source=installer/lib.sh
+source installer/lib.sh
+# shellcheck source=installer/detect.sh
+source installer/detect.sh
+
+for arg in "$@"; do
+  case "$arg" in
+    --dry-run) DRY_RUN=1 ;;
+    -h | --help)
+      sed -n '3,9s/^# \{0,1\}//p' "${BASH_SOURCE[0]##*/}"
+      exit 0
+      ;;
+    *) die "Unknown argument: $arg" ;;
+  esac
+done
+export DRY_RUN
+
+[[ $EUID -ne 0 ]] || die "Run this as your user, not root; it uses sudo where needed."
+
+detect_capabilities
+
+if is_dry_run; then
+  for flag in "${CAPABILITY_FLAGS[@]}"; do
+    plan flag "$flag=${!flag}"
+  done
+else
+  log_info "Detected capabilities (override with e.g. HAS_NVIDIA=0 ./install.sh):"
+  for flag in "${CAPABILITY_FLAGS[@]}"; do
+    printf '  %s=%s\n' "$flag" "${!flag}" >&2
+  done
+  read -r -p "Install with these capabilities? [y/N] " answer || answer=
+  [[ $answer == [yY]* ]] || die "Installation aborted."
 fi
 
-echo "$(tput setaf 166)[WARNING]$(tput sgr0): It is expected that this script is run on a fresh install of Fedora Minimal."
+for module in installer/modules/*.sh; do
+  bash "$module"
+done
 
-read -p "$(tput setaf 6)Begin Hypr-Fedora Installation? (y/n): $(tput sgr0)" proceed
-
-if [ "$proceed" != "y" ]; then
-  echo "Installation aborted."
-  exit 1
-fi
-
-# Make script executable and execute it
-execute_script() {
-  local script="$1"
-  if [ -f "$script" ]; then
-    chmod +x "$script"
-    if [ -x "$script" ]; then
-      "$script"
-    else
-      echo "Failed to make script '$script' executable."
-    fi
-  else
-    echo "Script '$script' not found"
-  fi
-}
-
-execute_script "system/copr.sh"
-execute_script "system/fedora.sh"
-execute_script "system/install_system.sh"
-execute_script "system/flathub.sh"
-execute_script "system/gtk.sh"
-execute_script "system/fonts.sh"
-execute_script "system/js-dev.sh"
-execute_script "system/applications.sh"
-execute_script "system/nvidia.sh"
-
-echo "$(tput setaf 2)[SUCCESS]: Installation complete$(tput sgr0)"
-echo "It is recommended to reboot your pc."
-exit 0
+is_dry_run || log_info "Installation complete. Reboot to start from a clean state."

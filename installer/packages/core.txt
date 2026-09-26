@@ -1,0 +1,87 @@
+# Packages every machine gets. One per line; `#` starts a comment.
+#
+# GPU drivers live in their own capability lists. starship and lazygit come
+# from GitHub releases, and Brave, Chrome and Steam need repos set up by their
+# own modules.
+
+# Hyprland session
+hyprland
+hyprlock
+hyprcursor
+hyprpolkitagent
+hyprpaper
+hyprland-guiutils     # dialogs Hyprland shows (formerly hyprland-qtutils)
+quickshell            # qs-bar: bar, notifications, power menu
+xdg-desktop-portal-hyprland
+xdg-desktop-portal-gtk
+
+# Terminal
+bat
+fish
+fzf
+kitty
+less
+nano
+neovim
+tmux
+tree
+
+# Desktop utilities
+rofi                  # launcher and clipboard picker
+cliphist              # clipboard history
+grim                  # screenshots
+slurp                 # select a screen region
+swappy                # screenshot editing
+wl-clipboard
+nm-connection-editor
+kvantum
+qt6ct
+qt6-qtsvg
+yad                   # dialogs from Thunar custom actions
+xdg-user-dirs
+xdg-utils
+gvfs
+gvfs-mtp
+
+# File manager
+Thunar
+thunar-volman
+thunar-archive-plugin
+tumbler
+ffmpegthumbnailer
+file-roller
+
+# Bluetooth and backlight: to move into capability lists
+bluez
+bluez-tools
+blueman
+brightnessctl
+
+# Audio
+pamixer
+pavucontrol
+pipewire-alsa
+pipewire-utils
+
+# CLI tools
+curl
+gawk
+ImageMagick
+jq
+openssl
+parallel
+pciutils              # lspci, for hardware detection
+ripgrep
+unzip
+usbutils
+wget2
+
+# Development
+golang
+python3
+
+# Apps
+inkscape
+meld
+obs-studio
+vlc
