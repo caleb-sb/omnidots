@@ -2,13 +2,12 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import Quickshell.Services.Greetd
-import "sessions.js" as Sessions
 
 // The login flow: one greetd session at a time, driven by PAM's conversation.
 // greetd sends any number of messages; the ones that need an answer (the
 // password, or a visible prompt) set `prompt`, and info and error messages
-// set `message`. Once PAM is done, the chosen session is launched and
-// Quickshell exits, which ends the greeter cleanly (see omnidots-greeter).
+// set `message`. Once PAM is done, Hyprland is launched and Quickshell exits,
+// which ends the greeter cleanly (see omnidots-greeter).
 //
 // greetd answers a cancel with a plain success, which Quickshell would take
 // for the end of the next login's authentication if that login started
@@ -18,11 +17,15 @@ import "sessions.js" as Sessions
 Item {
     id: root
 
-    // The user being logged in, and the session to start.
+    // The machine's user, from the `user` file 88-greeter.sh deploys next to
+    // this one. With it there's no user field; without it, there is.
+    property string owner: ""
+    // The owner's first name, from their account's full name, for the
+    // greeting (as lockinfo.sh does for hyprlock).
+    property string firstName: ""
+
+    // The user being logged in.
     property string user: ""
-    property var sessions: []
-    property int sessionIndex: 0
-    readonly property var session: sessions[sessionIndex] ?? null
 
     // The pending PAM prompt, e.g. "Password: ", and whether to show what's
     // typed. Empty when nothing is being asked.
@@ -34,16 +37,16 @@ Item {
     readonly property bool active: Greetd.state !== GreetdState.Inactive
     // Waiting on greetd: between an answer and the next message.
     readonly property bool busy: active && !prompt
-    // Bumped on a failed login, so the card can shake.
+    // Bumped on a failed login, so the form can shake.
     property int failures: 0
     // Typed before the login it answers had started (after a failure):
     // the answer to that login's first prompt.
     property string pendingAnswer: ""
 
-    // The user and session from the last login, kept in the greeter user's
-    // home (/var/lib/greetd), which greetd's package makes writable for it.
+    // Without an owner, the user from the last login, kept in the greeter
+    // user's home (/var/lib/greetd), which greetd's package makes writable
+    // for it.
     readonly property string statePath: `${Quickshell.env("HOME")}/omnidots-greeter.json`
-    property string rememberedSession: ""
 
     // start(user, answer) — log in as user, with the answer to its first
     // prompt if already typed. Only between logins; see editUser().
@@ -74,18 +77,6 @@ Item {
             return;
         prompt = "";
         Greetd.respond(text);
-    }
-
-    function cycleSession(by: int): void {
-        if (sessions.length)
-            sessionIndex = (sessionIndex + by + sessions.length) % sessions.length;
-    }
-
-    function remember(): void {
-        stateFile.setText(JSON.stringify({
-            user: root.user,
-            session: root.session?.name ?? ""
-        }) + "\n");
     }
 
     Connections {
@@ -123,10 +114,14 @@ Item {
             root.failures++;
         }
 
+        // Hyprland is the only session, started the way its session file
+        // (/usr/share/wayland-sessions/hyprland.desktop) and tuigreet do.
         function onReadyToLaunch(): void {
-            const s = root.session;
-            root.remember();
-            Greetd.launch([s.command], Sessions.environment(s));
+            if (!root.owner)
+                stateFile.setText(JSON.stringify({
+                    user: root.user
+                }) + "\n");
+            Greetd.launch(["start-hyprland"], ["XDG_SESSION_TYPE=wayland", "XDG_CURRENT_DESKTOP=Hyprland"]);
         }
     }
 
@@ -141,24 +136,20 @@ Item {
         }
     }
 
-    // The session files whose TryExec, if any, is installed.
     Process {
-        running: true
-        command: ["sh", "-c", `
-            for f in /usr/share/wayland-sessions/*.desktop; do
-                [ -f "$f" ] || continue
-                try=$(sed -n 's/^TryExec=//p' "$f" | head -n 1)
-                [ -z "$try" ] || command -v "$try" >/dev/null || continue
-                cat "$f"; echo
-            done`]
+        running: root.owner !== ""
+        command: ["getent", "passwd", root.owner]
         stdout: StdioCollector {
-            onStreamFinished: root.setSessions(text)
+            onStreamFinished: root.firstName = text.split(":")[4]?.split(",")[0].split(" ")[0] ?? ""
         }
     }
 
-    function setSessions(listing: string): void {
-        sessions = Sessions.parse(listing);
-        sessionIndex = Sessions.defaultIndex(sessions, rememberedSession);
+    FileView {
+        id: ownerFile
+
+        path: Quickshell.shellPath("user")
+        blockLoading: true
+        printErrors: false
     }
 
     FileView {
@@ -171,14 +162,11 @@ Item {
     }
 
     Component.onCompleted: {
-        // Until the session files are read, and if they can't be.
-        setSessions("");
+        owner = ownerFile.text().trim();
         let saved = {};
         try {
             saved = JSON.parse(stateFile.text() || "{}");
         } catch (e) {}
-        rememberedSession = saved.session ?? "";
-        if (saved.user)
-            start(saved.user, "");
+        start(owner || saved.user || "", "");
     }
 }

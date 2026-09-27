@@ -599,8 +599,8 @@ greeter_steps() {
     "pkg: tuigreet" \
     "pkg: gnome-keyring" \
     "pkg: gnome-keyring-pam" \
-    "deploy: $REPO_ROOT/greeter -> /usr/local/share/omnidots-greeter" \
-    "deploy: $fonts/JetBrainsMonoNerdFont/JetBrainsMonoNerdFontPropo-*.ttf $fonts/MaterialSymbolsRounded/MaterialSymbolsRounded.ttf -> /usr/local/share/fonts/omnidots-greeter" \
+    "deploy: $REPO_ROOT/greeter + user $(id -un) + background $BATS_TEST_TMPDIR/home/.config/hypr/papers/Staircase.png -> /usr/local/share/omnidots-greeter" \
+    "deploy: $fonts/JetBrainsMonoNerdFont/JetBrainsMonoNerdFontPropo-*.ttf $fonts/JetBrainsMonoNerdFont/JetBrainsMonoNerdFont-Regular.ttf $fonts/JetBrainsMonoNerdFont/JetBrainsMonoNerdFont-Bold.ttf $fonts/MaterialSymbolsRounded/MaterialSymbolsRounded.ttf -> /usr/local/share/fonts/omnidots-greeter" \
     "deploy: $REPO_ROOT/installer/greeter/omnidots-greeter.sh -> /usr/local/bin/omnidots-greeter" \
     "deploy: $REPO_ROOT/installer/greeter/greetd.toml -> /etc/greetd/config.toml" \
     "deploy: $REPO_ROOT/installer/greeter/greetd.pam -> /etc/pam.d/greetd" \

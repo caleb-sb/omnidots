@@ -1,26 +1,29 @@
 //@ pragma UseQApplication
 
 import QtQuick
+import QtQuick.Effects
 import Quickshell
 import Quickshell.Wayland
 import Quickshell.Hyprland
+import Quickshell.Io
 import Quickshell.Services.Greetd
 import qs.config
 import qs.components
 
 // The login screen, run by greetd inside a minimal Hyprland session (see
-// hyprland.lua and installer/greeter/omnidots-greeter.sh). Every screen gets
-// the Tokyo Night background and the clock; the login card goes on the screen
+// hyprland.lua and installer/greeter/omnidots-greeter.sh), made to look like
+// the lock screen (config/hypr/hyprlock.conf). Every screen gets the blurred
+// wallpaper, the clock and the greeting; the login form goes on the screen
 // Hyprland focused first. Theme and components are qs-bar's.
 ShellRoot {
     id: shell
 
-    // The screen with the login card, fixed once known so typing never moves.
-    property string cardScreen: ""
+    // The screen with the login form, fixed once known so typing never moves.
+    property string formScreen: ""
     readonly property string focused: Hyprland.focusedMonitor?.name ?? ""
     onFocusedChanged: {
-        if (!cardScreen || !Quickshell.screens.some(s => s.name === cardScreen))
-            cardScreen = focused;
+        if (!formScreen || !Quickshell.screens.some(s => s.name === formScreen))
+            formScreen = focused;
     }
 
     Auth {
@@ -45,6 +48,26 @@ ShellRoot {
         precision: SystemClock.Minutes
     }
 
+    // Each output's scale, for hyprlock's sizes, which are in physical
+    // pixels. From hyprctl, since Quickshell reports fractional scales
+    // rounded up.
+    property var scales: ({})
+
+    Process {
+        running: true
+        command: ["hyprctl", "monitors", "-j"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const scales = {};
+                try {
+                    for (const m of JSON.parse(text))
+                        scales[m.name] = m.scale;
+                } catch (e) {}
+                shell.scales = scales;
+            }
+        }
+    }
+
     Variants {
         model: Quickshell.screens
 
@@ -52,7 +75,15 @@ ShellRoot {
             id: win
 
             required property ShellScreen modelData
-            readonly property bool hasCard: modelData.name === shell.cardScreen || (!shell.cardScreen && modelData === Quickshell.screens[0])
+            readonly property bool hasForm: modelData.name === shell.formScreen || (!shell.formScreen && modelData === Quickshell.screens[0])
+            // Logical px per hyprlock px.
+            readonly property real unit: 1 / (shell.scales[modelData.name] || 1)
+
+            // lockFont(size) — hyprlock's font_size (points at 96 dpi, in
+            // physical pixels) in logical px.
+            function lockFont(size: real): real {
+                return size * 4 / 3 * unit;
+            }
 
             screen: modelData
             anchors {
@@ -62,56 +93,74 @@ ShellRoot {
                 right: true
             }
             exclusionMode: ExclusionMode.Ignore
+            // Until the wallpaper loads, or if it can't, as hyprlock does
+            // without its screenshot.
             color: Theme.c.bg
 
             WlrLayershell.namespace: "omnidots-greeter"
             WlrLayershell.layer: WlrLayer.Overlay
-            WlrLayershell.keyboardFocus: hasCard ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+            WlrLayershell.keyboardFocus: hasForm ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
 
-            // A faint glow from the top, in the bar's blue.
+            // The wallpaper, blurred and darkened like hyprlock's background
+            // (brightness 0.6). 88-greeter.sh deploys it as `background`.
+            Image {
+                id: wallpaper
+
+                anchors.fill: parent
+                source: Qt.resolvedUrl("background")
+                sourceSize: Qt.size(width, height)
+                fillMode: Image.PreserveAspectCrop
+                asynchronous: true
+                visible: false
+            }
+            MultiEffect {
+                anchors.fill: parent
+                source: wallpaper
+                visible: wallpaper.status === Image.Ready
+                autoPaddingEnabled: false
+                blurEnabled: true
+                blur: 1
+                blurMax: 64
+            }
             Rectangle {
                 anchors.fill: parent
-                gradient: Gradient {
-                    GradientStop {
-                        position: 0
-                        color: Qt.alpha(Theme.c.blue7, 0.35)
-                    }
-                    GradientStop {
-                        position: 0.6
-                        color: "transparent"
-                    }
-                }
+                visible: wallpaper.status === Image.Ready
+                color: "black"
+                opacity: 0.4
             }
 
-            Column {
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.bottom: card.visible ? card.top : parent.verticalCenter
-                anchors.bottomMargin: 48
-                spacing: 4
-
-                StyledText {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    text: Qt.formatDateTime(clock.date, "HH:mm")
-                    font.pixelSize: 96
-                    font.weight: Font.Bold
-                }
-                StyledText {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    text: Qt.formatDateTime(clock.date, "dddd, d MMMM")
-                    color: Theme.c.fgDark
-                    font.pixelSize: Theme.font.title
-                }
+            // ── Time, date and greeting, where hyprlock has them ─────
+            LockLabel {
+                offset: 240
+                text: Qt.formatDateTime(clock.date, "HH:mm")
+                font.pixelSize: win.lockFont(96)
+                font.weight: Font.Bold
+            }
+            LockLabel {
+                offset: 140
+                text: Qt.formatDateTime(clock.date, "dddd, d MMMM")
+                color: Theme.c.fgDark
+                font.pixelSize: win.lockFont(20)
+            }
+            LockLabel {
+                offset: 60
+                visible: authFlow.owner !== ""
+                text: `Hi, ${authFlow.firstName || authFlow.owner}`
+                color: Theme.c.blue
+                font.pixelSize: win.lockFont(16)
             }
 
-            LoginCard {
-                id: card
+            LoginForm {
+                id: form
 
                 auth: authFlow
-                visible: win.hasCard
+                unit: win.unit
+                visible: win.hasForm
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.verticalCenter: parent.verticalCenter
-                anchors.verticalCenterOffset: 60
+                anchors.verticalCenterOffset: 20 * win.unit
                 width: implicitWidth
+                height: implicitHeight
 
                 onVisibleChanged: if (visible)
                     focusField()
@@ -121,18 +170,18 @@ ShellRoot {
 
             // The way out if this screen misbehaves (see hyprland.lua).
             StyledText {
-                visible: win.hasCard
+                visible: win.hasForm
                 anchors.left: parent.left
                 anchors.bottom: parent.bottom
                 anchors.margins: 24
                 text: "Ctrl+Alt+Backspace: text login"
                 color: Theme.c.comment
-                font.pixelSize: Theme.font.small
+                font.pixelSize: 15
             }
 
             // Power off and restart, bottom right.
             Row {
-                visible: win.hasCard
+                visible: win.hasForm
                 anchors.right: parent.right
                 anchors.bottom: parent.bottom
                 anchors.margins: 24
@@ -150,6 +199,17 @@ ShellRoot {
                     iconColor: Theme.c.dark5
                     onClicked: Quickshell.execDetached(["systemctl", "poweroff"])
                 }
+            }
+
+            // A hyprlock label: centred, `offset` hyprlock px above the
+            // middle, in hyprlock's font.
+            component LockLabel: StyledText {
+                property real offset
+
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.verticalCenterOffset: -offset * win.unit
+                font.family: "JetBrainsMono Nerd Font"
             }
         }
     }
