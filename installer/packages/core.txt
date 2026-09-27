@@ -62,12 +62,14 @@ pipewire-utils
 # CLI tools
 curl
 gawk
+gzip                  # for tar, on .tar.gz releases
 ImageMagick
-jq
+jq                    # reads Proton Mail's release list
 openssl
 parallel
 pciutils              # lspci, for hardware detection
 ripgrep
+tar                   # unpacks the starship and lazygit releases
 unzip
 usbutils
 wget2

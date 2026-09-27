@@ -2,12 +2,19 @@
 #
 # The installer's dry-run plan is the test seam: each test runs the full
 # installer against a recorded hardware fixture and asserts on printed lines.
+# Release lookups read the responses recorded in fixtures/releases, and a stub
+# rpm reports nothing installed, so the plan needs no network and doesn't
+# depend on this machine.
 
 bats_require_minimum_version 1.5.0
 
 setup() {
   REPO_ROOT="$(cd "$BATS_TEST_DIRNAME/.." && pwd)"
   FIXTURES="$BATS_TEST_DIRNAME/fixtures"
+  RPM_STUB="$BATS_TEST_TMPDIR/rpm-stub"
+  mkdir -p "$RPM_STUB"
+  printf '#!/bin/sh\necho "package is not installed"\nexit 1\n' >"$RPM_STUB/rpm"
+  chmod +x "$RPM_STUB/rpm"
 }
 
 # plan_for <fixture> [VAR=value...] — dry-run the installer against a fixture.
@@ -22,6 +29,7 @@ plan_for() {
     OMNIDOTS_SYSFS_ROOT="$FIXTURES/$fixture/sysfs" \
     OMNIDOTS_LSPCI_FILE="$FIXTURES/$fixture/lspci.txt" \
     OMNIDOTS_OS_RELEASE="$FIXTURES/os-release" \
+    OMNIDOTS_RELEASES_DIR="$FIXTURES/releases" PATH="$RPM_STUB:$PATH" \
     "$@" "$REPO_ROOT/install.sh" --dry-run
 }
 
@@ -121,7 +129,10 @@ repo: flathub" ]
     plan_for "$fixture" PATH="$stubs:$PATH"
     [ "$status" -eq 0 ]
   done
-  [ ! -e "$BATS_TEST_TMPDIR/calls" ]
+  # Only read-only queries ran: the installed versions of the release rpms.
+  touch "$BATS_TEST_TMPDIR/calls"
+  run grep -v '^rpm -q ' "$BATS_TEST_TMPDIR/calls"
+  [ "$status" -eq 1 ]
 }
 
 @test "rejects unknown arguments" {
@@ -470,5 +481,20 @@ pkg: akmod-nvidia" ]
     assert_line "run: pnpm runtime set node lts -g"
     assert_line "run: curl -fsSL https://bun.sh/install | bash"
     assert_line "run: curl -fsSL https://claude.ai/install.sh | bash"
+  done
+}
+
+@test "every machine: starship, lazygit, OpenWhispr and Proton Mail from their latest upstream releases" {
+  local home="$BATS_TEST_TMPDIR/home"
+  for fixture in desktop core-ultra-laptop hybrid-laptop old-intel-laptop; do
+    plan_for "$fixture"
+    [ "$status" -eq 0 ]
+    assert_line "release: starship 1.26.0 https://github.com/starship/starship/releases/download/v1.26.0/starship-x86_64-unknown-linux-musl.tar.gz -> $home/.local/bin/starship"
+    assert_line "release: lazygit 0.65.1 https://github.com/jesseduffield/lazygit/releases/download/v0.65.1/lazygit_0.65.1_linux_x86_64.tar.gz -> $home/.local/bin/lazygit"
+    assert_line "release: open-whispr 1.10.2 https://github.com/OpenWhispr/openwhispr/releases/download/v1.10.2/OpenWhispr-1.10.2-linux-x86_64.rpm"
+    assert_line "release: proton-mail 1.14.0 https://proton.me/download/mail/linux/1.14.0/ProtonMail-desktop-beta.rpm"
+    assert_line "pkg: tar"
+    assert_line "pkg: gzip"
+    refute_match '^repo: copr:atim/'
   done
 }

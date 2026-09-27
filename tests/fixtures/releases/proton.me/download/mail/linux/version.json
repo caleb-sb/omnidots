@@ -1,0 +1,73 @@
+{
+  "Releases": [
+    {
+      "CategoryName": "EarlyAccess",
+      "Version": "1.15.0",
+      "ReleaseDate": "2026-09-22",
+      "File": [
+        {
+          "Identifier": ".deb (Ubuntu/Debian)",
+          "Url": "https://proton.me/download/mail/linux/1.15.0/ProtonMail-desktop-beta.deb",
+          "Sha512CheckSum": "9a0f3f4a1190b01017becdf5a0ae92583a7f3c67a34b1557ea7aa80bfed7e5b6d7701bbf0a388cede38a3e7d8c5bc4522b18605eb1949828b2c954954459f55c"
+        },
+        {
+          "Identifier": ".rpm (Fedora/RHEL)",
+          "Url": "https://proton.me/download/mail/linux/1.15.0/ProtonMail-desktop-beta.rpm",
+          "Sha512CheckSum": "c5ec0e7eb519ad2f2fbeec3eae2474ee61eb5e0d17ec69ba1e2c1700237239032dab7d929a0a617cbe0dc36f97c7bbbb3ffe275d13474b7aff8bd1804793fc5a"
+        }
+      ],
+      "ReleaseNotes": [],
+      "RolloutProportion": 0.1,
+      "ManualUpdate": [
+        "0.9.0"
+      ],
+      "MinimumAppVersion": "1.12.0"
+    },
+    {
+      "CategoryName": "Stable",
+      "Version": "1.14.0",
+      "ReleaseDate": "2026-08-26",
+      "File": [
+        {
+          "Identifier": ".deb (Ubuntu/Debian)",
+          "Url": "https://proton.me/download/mail/linux/1.14.0/ProtonMail-desktop-beta.deb",
+          "Sha512CheckSum": "5908632fe34e3d40b698c9459bb774428a5b6aedd7c89ed9ff68394b90227c689a5a03ee719f9b3a4e20c7c4a69ce67fe40ab12e0f344359e9005c7be839d818"
+        },
+        {
+          "Identifier": ".rpm (Fedora/RHEL)",
+          "Url": "https://proton.me/download/mail/linux/1.14.0/ProtonMail-desktop-beta.rpm",
+          "Sha512CheckSum": "0b4ba742b86754bf2a85672096eeca0baa14799044ba4129c2d96668db8a111bd8ad3bc0769ace711e505bde3712251a4933fb0c5702dffe9a32193918f476be"
+        }
+      ],
+      "ReleaseNotes": [],
+      "RolloutProportion": 1,
+      "ManualUpdate": [
+        "0.9.0"
+      ],
+      "MinimumAppVersion": "1.12.0"
+    },
+    {
+      "CategoryName": "Stable",
+      "Version": "1.13.4",
+      "ReleaseDate": "2026-07-29",
+      "File": [
+        {
+          "Identifier": ".deb (Ubuntu/Debian)",
+          "Url": "https://proton.me/download/mail/linux/1.13.4/ProtonMail-desktop-beta.deb",
+          "Sha512CheckSum": "3497f9efdaa76ea3bcbde7e30a997a272b3dbd20145131be6113195ececfab0bc9c1466dd09e42d4cff7e1b0b9dddc1d91bed03c90ce6e33f37d6eccc88f4f40"
+        },
+        {
+          "Identifier": ".rpm (Fedora/RHEL)",
+          "Url": "https://proton.me/download/mail/linux/1.13.4/ProtonMail-desktop-beta.rpm",
+          "Sha512CheckSum": "2db3d08fc0d1a0d1111c156900534150e414d4fb273d8dd82aa580b64d6f5ff97c620e53b94c70e270a230020132f40fc2d5f2b01786274c37c0a123f3b2f169"
+        }
+      ],
+      "ReleaseNotes": [],
+      "RolloutProportion": 1,
+      "ManualUpdate": [
+        "0.9.0"
+      ],
+      "MinimumAppVersion": "1.12.0"
+    }
+  ]
+}

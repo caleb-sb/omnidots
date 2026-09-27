@@ -8,10 +8,10 @@ See spec: Installer architecture (update command), Package sources (starship, la
 
 **Status:** ready-for-agent
 
-- [ ] The shared library has a GitHub-release fetch helper. It resolves the latest release, compares it with the installed version, and installs a binary into the user's local bin directory or installs an rpm via dnf. It skips when versions match.
-- [ ] starship and lazygit are installed from upstream release binaries. The atim COPRs are no longer used.
-- [ ] OpenWhispr is installed and updated from its GitHub release rpm.
-- [ ] Proton Mail is installed and updated from Proton's official rpm download.
-- [ ] The update command runs standalone and supports dry-run. The installer invokes the same code for first install.
-- [ ] bats asserts the dry-run plan lists these items. Network lookups are stubbed in tests so the suite runs offline.
-- [ ] shellcheck passes.
+- [x] The shared library has a GitHub-release fetch helper. It resolves the latest release, compares it with the installed version, and installs a binary into the user's local bin directory or installs an rpm via dnf. It skips when versions match.
+- [x] starship and lazygit are installed from upstream release binaries. The atim COPRs are no longer used.
+- [x] OpenWhispr is installed and updated from its GitHub release rpm.
+- [x] Proton Mail is installed and updated from Proton's official rpm download.
+- [x] The update command runs standalone and supports dry-run. The installer invokes the same code for first install.
+- [x] bats asserts the dry-run plan lists these items. Network lookups are stubbed in tests so the suite runs offline.
+- [x] shellcheck passes.

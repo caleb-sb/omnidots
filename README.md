@@ -40,11 +40,27 @@ akmods signing key and queues it with `mokutil --import`, which asks for a
 one-time password. At the next boot, choose Enroll MOK in the blue MOK
 manager and enter that password, or the NVIDIA module won't load.
 
+## Update
+
+Tools that don't come from a dnf repo are installed from their upstream
+releases: starship and lazygit into `~/.local/bin`, and the OpenWhispr and
+Proton Mail rpms. Refresh them with:
+
+```sh
+./update.sh            # install anything with a newer release
+./update.sh --dry-run  # print what's new (`release:`) or current (`current:`)
+```
+
+It skips anything already at its latest release, so it's safe to run often.
+The installer runs the same step (`installer/modules/80-releases.sh`) for the
+first install.
+
 Layout:
 
 - `install.sh`: entry point
+- `update.sh`: refreshes what doesn't come from a dnf repo
 - `installer/lib.sh`: logging, batched package and flatpak install, flag
-  check, dry-run
+  check, dry-run, upstream release install
 - `installer/detect.sh`: capability detection
 - `installer/modules/NN-*.sh`: one job each, run in order
 - `installer/packages/*.txt`: package lists, one package per line, `#` comments
@@ -79,4 +95,6 @@ Both are dev-only: `sudo dnf install ShellCheck bats`.
 
 Tests run the installer in dry-run mode against recorded machines in
 `tests/fixtures/<machine>/` (`lspci.txt` is `lspci -n` output, `sysfs/`
-mirrors `/sys`) and assert only on the printed plan.
+mirrors `/sys`) and assert only on the printed plan. Release lookups read
+responses recorded in `tests/fixtures/releases/` (set `OMNIDOTS_RELEASES_DIR`),
+so the suite runs offline.
