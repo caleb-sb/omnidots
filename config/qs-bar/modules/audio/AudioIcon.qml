@@ -74,7 +74,7 @@ Item {
                     size: 16
                     opacity: Audio.sourceMuted ? 1 : 0
                     text: "mic_off"
-                    color: Theme.c.red
+                    color: Theme.c.comment
 
                     Behavior on opacity {
                         Anim {
