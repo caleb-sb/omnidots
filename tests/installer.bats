@@ -589,3 +589,53 @@ pkg: akmod-nvidia" ]
   assert_line "pkg: gtk-murrine-engine"
   assert_line "pkg: xz"
 }
+
+# The greeter's steps, in the order they run.
+greeter_steps() {
+  local fonts="$BATS_TEST_TMPDIR/home/.local/share/fonts"
+  printf '%s\n' \
+    "pkg: greetd" \
+    "pkg: tuigreet" \
+    "pkg: gnome-keyring" \
+    "pkg: gnome-keyring-pam" \
+    "deploy: $REPO_ROOT/greeter -> /usr/local/share/omnidots-greeter" \
+    "deploy: $fonts/JetBrainsMonoNerdFont/JetBrainsMonoNerdFontPropo-*.ttf $fonts/MaterialSymbolsRounded/MaterialSymbolsRounded.ttf -> /usr/local/share/fonts/omnidots-greeter" \
+    "deploy: $REPO_ROOT/installer/greeter/omnidots-greeter.sh -> /usr/local/bin/omnidots-greeter" \
+    "deploy: $REPO_ROOT/installer/greeter/greetd.toml -> /etc/greetd/config.toml" \
+    "deploy: $REPO_ROOT/installer/greeter/greetd.pam -> /etc/pam.d/greetd" \
+    "run: sudo systemctl enable --force greetd" \
+    "run: sudo systemctl set-default graphical.target"
+}
+
+@test "every machine: greetd with the Quickshell greeter, tuigreet as fallback, a password-only PAM stack, and a graphical boot" {
+  for fixture in desktop core-ultra-laptop hybrid-laptop old-intel-laptop; do
+    plan_for "$fixture"
+    [ "$status" -eq 0 ]
+    local steps
+    steps="$(grep -E '^(pkg: (greetd|tuigreet|gnome-keyring|gnome-keyring-pam)|deploy: |run: sudo systemctl (enable --force greetd|set-default))' <<<"$output")"
+    if [ "$steps" != "$(greeter_steps)" ]; then
+      printf 'greeter steps:\n%s\nexpected:\n%s\n' "$steps" "$(greeter_steps)" >&2
+      return 1
+    fi
+    # Never started now: that would end the session on tty1 mid-install.
+    refute_match 'enable --now greetd|start greetd|isolate'
+  done
+}
+
+@test "the greeter comes after the everyday setup, before fingerprint enrollment and the NVIDIA build wait" {
+  local first
+  first="$(greeter_steps | head -n 1)"
+  plan_for desktop
+  [ "$status" -eq 0 ]
+  local greeter_at docker_at wait_at
+  greeter_at="$(grep -nxF -- "$first" <<<"$output" | cut -d: -f1)"
+  docker_at="$(grep -n '^run: sudo systemctl enable --now docker' <<<"$output" | cut -d: -f1)"
+  wait_at="$(grep -n '^wait: akmods' <<<"$output" | cut -d: -f1)"
+  [ "$greeter_at" -gt "$docker_at" ]
+  [ "$wait_at" -gt "$greeter_at" ]
+
+  plan_for core-ultra-laptop
+  [ "$status" -eq 0 ]
+  greeter_at="$(grep -nxF -- "$first" <<<"$output" | cut -d: -f1)"
+  [ "$(grep -n '^ask: fprintd-enroll' <<<"$output" | cut -d: -f1)" -gt "$greeter_at" ]
+}

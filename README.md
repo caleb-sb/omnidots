@@ -58,6 +58,34 @@ akmods signing key and queues it with `mokutil --import`, which asks for a
 one-time password. At the next boot, choose Enroll MOK in the blue MOK
 manager and enter that password, or the NVIDIA module won't load.
 
+## Login screen
+
+The machine boots to the graphical target and greetd, which runs a Quickshell
+greeter (`greeter/`) inside a minimal Hyprland session (`greeter/hyprland.lua`)
+as the `greetd` user. It uses qs-bar's theme and components, which
+`greeter/config` and `greeter/components` link to. It remembers the last user
+and session, and defaults to Hyprland via `start-hyprland`.
+
+The greeter user can't read this repo in your home, so the installer copies
+the greeter to `/usr/local/share/omnidots-greeter`, its fonts to
+`/usr/local/share/fonts/omnidots-greeter`, and the system files in
+`installer/greeter/` to `/usr/local/bin/omnidots-greeter`,
+`/etc/greetd/config.toml` and `/etc/pam.d/greetd`. After changing any of them,
+redeploy with:
+
+```sh
+installer/modules/88-greeter.sh
+DRY_RUN=1 installer/modules/88-greeter.sh  # print the plan only
+```
+
+Login takes the password only: greetd's PAM stack uses `password-auth`, which
+authselect's fingerprint feature leaves alone, so the keyring unlocks.
+
+If the greeter fails (Quickshell errors or crashes, or Hyprland doesn't
+start), tuigreet takes over. `Ctrl+Alt+Backspace` on the login screen
+switches to tuigreet by hand, and `Ctrl+Alt+F2` reaches a text console.
+GDM stays installed but no longer starts.
+
 ## Update
 
 Tools that don't come from a dnf repo are installed from their upstream

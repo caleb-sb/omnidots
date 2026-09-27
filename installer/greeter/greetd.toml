@@ -1,0 +1,12 @@
+# greetd's config, deployed to /etc/greetd/config.toml by
+# installer/modules/88-greeter.sh. See greetd(5).
+
+[terminal]
+vt = 1
+
+[default_session]
+# The Quickshell greeter in a minimal Hyprland session, or tuigreet if that
+# exits abnormally.
+command = "/usr/local/bin/omnidots-greeter"
+# Fedora's greetd package creates this user; its home is /var/lib/greetd.
+user = "greetd"

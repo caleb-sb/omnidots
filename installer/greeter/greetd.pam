@@ -1,0 +1,26 @@
+#%PAM-1.0
+# greetd's PAM stack for user sessions, deployed to /etc/pam.d/greetd by
+# installer/modules/88-greeter.sh, where it overrides the package's
+# /usr/lib/pam.d/greetd. That one is Fedora's, except for password-auth in
+# place of system-auth: authselect's with-fingerprint feature adds pam_fprintd
+# to system-auth only, so logging in takes the password and nothing else.
+# That's what unlocks the keyring (a finger can't), and it closes tuigreet's
+# fprintd authentication bypass.
+auth       substack    password-auth
+auth       optional    pam_gnome_keyring.so
+auth       include     postlogin
+
+account    required    pam_sepermit.so
+account    required    pam_nologin.so
+account    include     password-auth
+
+password   include     password-auth
+
+session    required    pam_selinux.so close
+session    required    pam_loginuid.so
+session    required    pam_selinux.so open
+session    optional    pam_keyinit.so force revoke
+session    required    pam_namespace.so
+session    include     password-auth
+session    optional    pam_gnome_keyring.so auto_start
+session    include     postlogin

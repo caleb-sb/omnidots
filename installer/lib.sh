@@ -8,9 +8,10 @@
 # backup, link, run, wait, gpu-order, flatpak for a Flathub app ID, ask for a
 # command the real run offers and the user can skip, release for an upstream
 # release to install: `<name> <version> <url>`, an rpm dnf installs, or with
-# `-> <path>` a binary or unpacked tarball put there, and current for one
-# already at the latest version, which is skipped). The tests assert on these
-# lines, so keep the format stable.
+# `-> <path>` a binary or unpacked tarball put there, current for one
+# already at the latest version, which is skipped, and deploy for a file or
+# directory from the repo copied into a system location: `<source> -> <dest>`).
+# The tests assert on these lines, so keep the format stable.
 # Logging goes to stderr so it never mixes with the plan.
 
 OMNIDOTS_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"

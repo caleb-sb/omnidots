@@ -1,0 +1,8 @@
+# The login screen (every machine). greetd runs the Quickshell greeter inside
+# a minimal Hyprland session; tuigreet is the terminal greeter it falls back
+# to. quickshell and hyprland come from the core list.
+
+greetd
+tuigreet
+gnome-keyring
+gnome-keyring-pam     # pam_gnome_keyring, which greetd's PAM stack uses to unlock it
