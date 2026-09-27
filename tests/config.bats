@@ -157,3 +157,56 @@ gsettings_value() {
   [ "$(ini_value "$ini" gtk-cursor-theme-name)" = "$(gsettings_value cursor-theme)" ]
   [ "$(ini_value "$ini" gtk-application-prefer-dark-theme)" = 1 ]
 }
+
+# start_fish <home> <fish-args...> — start fish with this repo's fish config
+# copied into a throwaway <home>, and nothing from the caller's environment
+# (no XDG_* pointing back at the real config). Prints fish's stdout; fails,
+# showing stderr, if fish exits non-zero or writes anything to stderr.
+start_fish() {
+  local home="$1" err="$BATS_TEST_TMPDIR/fish.stderr" code=0
+  shift
+  mkdir -p "$home/.config"
+  rm -rf "$home/.config/fish"
+  cp -r "$CONFIG/fish" "$home/.config/fish"
+  # Universal variables are machine-local (gitignored); a fresh one has none.
+  rm -f "$home/.config/fish/fish_variables"
+  env -i HOME="$home" PATH=/usr/bin:/bin TERM=xterm-256color \
+    fish "$@" 2>"$err" || code=$?
+  if [ "$code" -ne 0 ] || [ -s "$err" ]; then
+    printf 'fish %s: exit %s, stderr:\n' "$*" "$code" >&2
+    cat "$err" >&2
+    return 1
+  fi
+}
+
+@test "every fish file passes fish's syntax check" {
+  command -v fish >/dev/null || skip "fish is not installed"
+  local file
+  while IFS= read -r -d '' file; do
+    run fish --no-execute "$file"
+    if [ "$status" -ne 0 ]; then
+      printf '%s\n' "$output" >&2
+      return 1
+    fi
+  done < <(find "$CONFIG/fish" -name '*.fish' -print0)
+}
+
+@test "fish starts cleanly in a fresh home without cargo, bun, pnpm or Android" {
+  command -v fish >/dev/null || skip "fish is not installed"
+  local home="$BATS_TEST_TMPDIR/home"
+  start_fish "$home" -l -c true
+  start_fish "$home" -l -i -c true >/dev/null
+}
+
+@test "fish picks up bun and the newest Android NDK when they are installed" {
+  command -v fish >/dev/null || skip "fish is not installed"
+  local home="$BATS_TEST_TMPDIR/home" out
+  mkdir -p "$home/.bun/bin" "$home/Android/Sdk/ndk/9.2.1" \
+    "$home/Android/Sdk/ndk/27.0.12077973" "$home/Android/Sdk/ndk/26.1.10909125" \
+    "$home/Android/Sdk/platform-tools"
+  # shellcheck disable=SC2016 # $PATH and $NDK_HOME are for fish to expand
+  out="$(start_fish "$home" -l -c 'printf "%s\n" $PATH; echo NDK_HOME=$NDK_HOME')"
+  [[ $'\n'"$out"$'\n' == *$'\n'"$home/.bun/bin"$'\n'* ]]
+  [[ $'\n'"$out"$'\n' == *$'\n'"$home/Android/Sdk/platform-tools"$'\n'* ]]
+  [[ $out == *$'\n'"NDK_HOME=$home/Android/Sdk/ndk/27.0.12077973" ]]
+}

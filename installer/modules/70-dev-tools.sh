@@ -40,7 +40,7 @@ run_installer() {
 log_info "Installing developer toolchains"
 
 # Fedora's rustup package only ships rustup-init; this puts rustup and the
-# stable toolchain in ~/.cargo. config/fish/conf.d/rustup.fish adds its PATH.
+# stable toolchain in ~/.cargo. config/fish/conf.d/cargo.fish adds its PATH.
 if is_dry_run || [[ ! -x $CARGO_BIN/rustup ]]; then
   run rustup-init -y --no-modify-path
 fi
