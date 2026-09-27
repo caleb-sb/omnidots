@@ -9,4 +9,6 @@ variable, as on a legacy-BIOS install.
 - `lspci.txt` is shaped like `lspci -n` output. Every vendor:device ID was
   checked against the PCI ID database (`/usr/share/hwdata/pci.ids`).
 - `sysfs/` mirrors the relevant `/sys` entries under `bus/pci/devices`: the
-  host bridge, the GPU and the Wi-Fi card.
+  host bridge, the GPU and the Wi-Fi card. Under `class/` it has a battery
+  (`BAT0`), an AC adapter, the `intel_backlight` backlight and a Bluetooth
+  adapter (placeholder files stand in for device directories).

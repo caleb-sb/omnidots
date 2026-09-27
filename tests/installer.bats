@@ -16,7 +16,8 @@ plan_for() {
   shift
   mkdir -p "$BATS_TEST_TMPDIR/home"
   run --separate-stderr env -u HAS_NVIDIA -u HAS_AMD_GPU -u HAS_INTEL_GPU \
-    -u HAS_LEGACY_INTEL_GPU -u HAS_HYBRID_GPU -u XDG_CONFIG_HOME \
+    -u HAS_LEGACY_INTEL_GPU -u HAS_HYBRID_GPU -u HAS_BATTERY -u HAS_BACKLIGHT \
+    -u HAS_BLUETOOTH -u XDG_CONFIG_HOME \
     -u XDG_DATA_HOME HOME="$BATS_TEST_TMPDIR/home" \
     OMNIDOTS_SYSFS_ROOT="$FIXTURES/$fixture/sysfs" \
     OMNIDOTS_LSPCI_FILE="$FIXTURES/$fixture/lspci.txt" \
@@ -104,7 +105,7 @@ repo: copr:errornointernet/quickshell" ]
 @test "dry-run executes nothing" {
   local stubs="$BATS_TEST_TMPDIR/bin"
   mkdir -p "$stubs"
-  for cmd in sudo dnf rpm mokutil kmodgenca akmods modinfo; do
+  for cmd in sudo dnf rpm mokutil kmodgenca akmods modinfo systemctl tuned-adm; do
     printf '#!/bin/sh\necho "%s $*" >>"%s"\n' "$cmd" "$BATS_TEST_TMPDIR/calls" >"$stubs/$cmd"
     chmod +x "$stubs/$cmd"
   done
@@ -275,4 +276,76 @@ pkg: akmod-nvidia" ]
   [ "$status" -eq 0 ]
   assert_line "pkg: akmod-nvidia"
   refute_match freeworld
+}
+
+@test "desktop: Bluetooth, but no battery or backlight" {
+  plan_for desktop
+  [ "$status" -eq 0 ]
+  assert_line "flag: HAS_BATTERY=0"
+  assert_line "flag: HAS_BACKLIGHT=0"
+  assert_line "flag: HAS_BLUETOOTH=1"
+}
+
+@test "laptops: battery, backlight and Bluetooth" {
+  for fixture in core-ultra-laptop hybrid-laptop old-intel-laptop; do
+    plan_for "$fixture"
+    [ "$status" -eq 0 ]
+    assert_line "flag: HAS_BATTERY=1"
+    assert_line "flag: HAS_BACKLIGHT=1"
+    assert_line "flag: HAS_BLUETOOTH=1"
+  done
+}
+
+@test "desktop: Bluetooth packages, no brightnessctl" {
+  plan_for desktop
+  [ "$status" -eq 0 ]
+  for pkg in bluez bluez-tools blueman; do
+    assert_line "pkg: $pkg"
+  done
+  refute_line "pkg: brightnessctl"
+}
+
+@test "laptops: brightnessctl" {
+  for fixture in core-ultra-laptop hybrid-laptop old-intel-laptop; do
+    plan_for "$fixture"
+    [ "$status" -eq 0 ]
+    assert_line "pkg: brightnessctl"
+  done
+}
+
+@test "HAS_BLUETOOTH=0 drops the Bluetooth packages" {
+  plan_for desktop HAS_BLUETOOTH=0
+  [ "$status" -eq 0 ]
+  refute_match '^pkg: (bluez|blueman)'
+}
+
+@test "HAS_BACKLIGHT=0 drops brightnessctl" {
+  plan_for core-ultra-laptop HAS_BACKLIGHT=0
+  [ "$status" -eq 0 ]
+  refute_line "pkg: brightnessctl"
+}
+
+@test "desktop: tuned pinned to throughput-performance once, no tuned-ppd" {
+  plan_for desktop
+  [ "$status" -eq 0 ]
+  assert_line "pkg: tuned"
+  [ "$(grep -c 'tuned-adm profile' <<<"$output")" -eq 1 ]
+  assert_line "run: sudo tuned-adm profile throughput-performance"
+  refute_line "pkg: tuned-ppd"
+}
+
+@test "laptops: tuned-ppd, and no pinned profile" {
+  for fixture in core-ultra-laptop hybrid-laptop old-intel-laptop; do
+    plan_for "$fixture"
+    [ "$status" -eq 0 ]
+    assert_line "pkg: tuned-ppd"
+    refute_match 'tuned-adm profile|throughput-performance'
+  done
+}
+
+@test "HAS_BATTERY=1 on the desktop swaps the pinned profile for tuned-ppd" {
+  plan_for desktop HAS_BATTERY=1
+  [ "$status" -eq 0 ]
+  assert_line "pkg: tuned-ppd"
+  refute_match 'tuned-adm profile|throughput-performance'
 }

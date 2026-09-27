@@ -9,4 +9,6 @@ Wi-Fi, NPU, audio and bus controllers, not GPUs.
   checked against the PCI ID database (`/usr/share/hwdata/pci.ids`); the slot
   layout follows the usual Intel mobile layout (iGPU at 00:02.0).
 - `sysfs/` mirrors the relevant `/sys` entries under `bus/pci/devices`: the
-  host bridge, the GPU and the Wi-Fi card.
+  host bridge, the GPU and the Wi-Fi card. Under `class/` it has a battery
+  (`BAT0`), an AC adapter, the `intel_backlight` backlight and a Bluetooth
+  adapter (placeholder files stand in for device directories).

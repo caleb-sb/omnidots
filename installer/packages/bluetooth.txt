@@ -1,0 +1,6 @@
+# Bluetooth adapters (HAS_BLUETOOTH=1). blueman-applet is autostarted as the
+# pairing agent.
+
+bluez
+bluez-tools           # bt-device, bt-adapter
+blueman

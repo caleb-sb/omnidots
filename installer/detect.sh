@@ -5,8 +5,8 @@
 #
 # Inputs, overridable so tests can feed in recorded machines:
 #   OMNIDOTS_LSPCI_FILE  recorded `lspci -n` output (default: run `lspci -n`)
-#   OMNIDOTS_SYSFS_ROOT  sysfs root (default: /sys), also read for the Secure
-#                        Boot state
+#   OMNIDOTS_SYSFS_ROOT  sysfs root (default: /sys), read for the battery,
+#                        backlight, Bluetooth and Secure Boot state
 #
 # A HAS_* variable already set in the environment (to 0 or 1) overrides
 # detection.
@@ -21,7 +21,7 @@ declare -A GPU_VENDOR_IDS=(
 # Display order for the confirmation prompt and the plan.
 # shellcheck disable=SC2034 # read by install.sh
 CAPABILITY_FLAGS=(HAS_NVIDIA HAS_AMD_GPU HAS_INTEL_GPU HAS_LEGACY_INTEL_GPU
-  HAS_HYBRID_GPU)
+  HAS_HYBRID_GPU HAS_BATTERY HAS_BACKLIGHT HAS_BLUETOOTH)
 
 # pci_devices — `lspci -n` style lines: "<slot> <class>: <vendor>:<device>".
 # Falls back to sysfs when lspci isn't installed (Minimal lacks pciutils).
@@ -88,6 +88,31 @@ secure_boot_enabled() {
   [[ -r $var ]] && [[ $(od -An -tu1 -j4 -N1 "$var" | tr -d ' ') == 1 ]]
 }
 
+# has_class_device <class> — true when sysfs lists a device of that class,
+# e.g. backlight or bluetooth.
+has_class_device() {
+  local dev
+  for dev in "${OMNIDOTS_SYSFS_ROOT:-/sys}/class/$1"/*; do
+    [[ -e $dev ]] && return 0
+  done
+  return 1
+}
+
+# has_system_battery — true when a power supply is a battery that powers the
+# machine. AC adapters and USB-C ports have type Mains or USB. Wireless mice,
+# keyboards and headsets report type Battery too, but with scope Device.
+has_system_battery() {
+  local supply type scope
+  for supply in "${OMNIDOTS_SYSFS_ROOT:-/sys}"/class/power_supply/*; do
+    [[ -r $supply/type ]] || continue
+    read -r type <"$supply/type"
+    scope=System
+    [[ -r $supply/scope ]] && read -r scope <"$supply/scope"
+    [[ $type == Battery && $scope != Device ]] && return 0
+  done
+  return 1
+}
+
 # set_flag <HAS_*> <0|1> — export the detected value unless overridden.
 set_flag() {
   local name="$1" detected="$2"
@@ -101,6 +126,7 @@ set_flag() {
 
 detect_capabilities() {
   local gpus vendors flag vendor device legacy=0 hybrid=0
+  local battery=0 backlight=0 bluetooth=0
   gpus="$(gpu_devices)"
   vendors="$(cut -d' ' -f2 <<<"$gpus")"
   for flag in "${!GPU_VENDOR_IDS[@]}"; do
@@ -129,4 +155,11 @@ detect_capabilities() {
     hybrid=1
   fi
   set_flag HAS_HYBRID_GPU "$hybrid"
+
+  if has_system_battery; then battery=1; fi
+  if has_class_device backlight; then backlight=1; fi
+  if has_class_device bluetooth; then bluetooth=1; fi
+  set_flag HAS_BATTERY "$battery"
+  set_flag HAS_BACKLIGHT "$backlight"
+  set_flag HAS_BLUETOOTH "$bluetooth"
 }

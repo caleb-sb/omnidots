@@ -8,10 +8,10 @@ See spec: Installer architecture (detection), Package sources (Power profile), U
 
 **Status:** ready-for-agent
 
-- [ ] Detection sets `HAS_BATTERY`, `HAS_BACKLIGHT` and `HAS_BLUETOOTH` from sysfs, through the overridable sysfs root.
-- [ ] brightnessctl is installed only with a backlight, and bluez, bluez-tools and blueman only with a Bluetooth adapter. These are removed from the core list.
-- [ ] No battery: the plan sets tuned's throughput-performance profile once. Battery present: the plan installs tuned-ppd and doesn't pin a profile.
-- [ ] All four fixtures are extended with the relevant sysfs entries, and bats asserts:
+- [x] Detection sets `HAS_BATTERY`, `HAS_BACKLIGHT` and `HAS_BLUETOOTH` from sysfs, through the overridable sysfs root.
+- [x] brightnessctl is installed only with a backlight, and bluez, bluez-tools and blueman only with a Bluetooth adapter. These are removed from the core list.
+- [x] No battery: the plan sets tuned's throughput-performance profile once. Battery present: the plan installs tuned-ppd and doesn't pin a profile.
+- [x] All four fixtures are extended with the relevant sysfs entries, and bats asserts:
   - the desktop never gets brightnessctl or tuned-ppd, and does get throughput-performance
   - the laptops get brightnessctl and tuned-ppd
-- [ ] shellcheck passes.
+- [x] shellcheck passes.

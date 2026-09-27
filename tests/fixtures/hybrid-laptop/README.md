@@ -11,4 +11,7 @@ is on.
   behind the CPU's x16 port on bus 01).
 - `sysfs/` mirrors the relevant `/sys` entries: the host bridge and both GPUs
   under `bus/pci/devices`, and the `SecureBoot` EFI variable under
-  `firmware/efi/efivars` (4 attribute bytes, then 01 for enabled).
+  `firmware/efi/efivars` (4 attribute bytes, then 01 for enabled). Under
+  `class/` it has a battery (`BAT0`), an AC adapter, the `intel_backlight`
+  backlight and a Bluetooth adapter (placeholder files stand in for device
+  directories).

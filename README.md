@@ -21,6 +21,11 @@ anything:
   NVIDIA this enables runtime power management. A card that reports as a VGA
   controller (0300), like a desktop card, doesn't count; set
   `HAS_HYBRID_GPU=1` on a MUX laptop whose dGPU reports 0300.
+- `HAS_BATTERY`: a battery that powers the machine (a wireless mouse's
+  doesn't count). With one, `tuned-ppd` is installed so qs-bar can switch
+  power profiles; without one, tuned is set to `throughput-performance`.
+- `HAS_BACKLIGHT`: a backlight device; installs `brightnessctl`
+- `HAS_BLUETOOTH`: a Bluetooth adapter; installs BlueZ and blueman
 
 Force any flag with an environment variable of the same name:
 

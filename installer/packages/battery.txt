@@ -1,0 +1,5 @@
+# Machines with a battery (HAS_BATTERY=1). tuned-ppd provides the
+# power-profiles-daemon D-Bus API on top of tuned; qs-bar switches profiles
+# through it.
+
+tuned-ppd

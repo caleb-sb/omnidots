@@ -1,0 +1,3 @@
+# Laptop screens (HAS_BACKLIGHT=1). qs-bar's brightness keys call brightnessctl.
+
+brightnessctl

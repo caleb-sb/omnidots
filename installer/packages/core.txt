@@ -1,8 +1,8 @@
 # Packages every machine gets. One per line; `#` starts a comment.
 #
-# GPU drivers live in their own capability lists. starship and lazygit come
-# from GitHub releases, and Brave, Chrome and Steam need repos set up by their
-# own modules.
+# GPU drivers and the Bluetooth, backlight and battery packages live in their
+# own capability lists. starship and lazygit come from GitHub releases, and
+# Brave, Chrome and Steam need repos set up by their own modules.
 
 # Hyprland session
 hyprland
@@ -50,12 +50,6 @@ thunar-archive-plugin
 tumbler
 ffmpegthumbnailer
 file-roller
-
-# Bluetooth and backlight: to move into capability lists
-bluez
-bluez-tools
-blueman
-brightnessctl
 
 # Audio
 pamixer
