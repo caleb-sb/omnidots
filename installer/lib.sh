@@ -8,14 +8,19 @@
 # backup, link, run, wait, gpu-order, flatpak for a Flathub app ID, ask for a
 # command the real run offers and the user can skip, release for an upstream
 # release to install: `<name> <version> <url>`, an rpm dnf installs, or with
-# `-> <path>` a binary put there, and current for one already at the latest
-# version, which is skipped). The tests assert
-# on these lines, so keep the format stable.
+# `-> <path>` a binary or unpacked tarball put there, and current for one
+# already at the latest version, which is skipped). The tests assert on these
+# lines, so keep the format stable.
 # Logging goes to stderr so it never mixes with the plan.
 
 OMNIDOTS_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PACKAGES_DIR="$OMNIDOTS_ROOT/installer/packages"
 LOCAL_BIN="$HOME/.local/bin"
+# Where the optional Android module puts Android Studio, and where the fish
+# config expects it. OMNIDOTS_OPT_DIR (default: /opt) lets tests use an empty
+# directory instead.
+# shellcheck disable=SC2034 # read by 85-android.sh and update.sh
+ANDROID_STUDIO_DIR="${OMNIDOTS_OPT_DIR:-/opt}/android-studio"
 : "${DRY_RUN:=0}"
 
 log_info() { printf '\e[36m[info]\e[0m %s\n' "$*" >&2; }

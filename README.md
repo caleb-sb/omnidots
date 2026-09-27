@@ -33,6 +33,24 @@ Force any flag with an environment variable of the same name:
 HAS_NVIDIA=0 ./install.sh --dry-run
 ```
 
+It then asks once whether to include each optional module, before
+installing anything:
+
+- gaming: Steam from RPM Fusion, and Discord and Heroic from Flathub. It also
+  installs xdotool, which `config/hypr/scripts/dontkillsteam.sh` uses to hide
+  Steam's window instead of closing it.
+- Android development: Android Studio from Google's Linux tarball, unpacked
+  into `/opt/android-studio` (where the fish config looks for its bundled
+  JDK), with a desktop entry in `/usr/local/share/applications`.
+
+Choose them up front with `WITH_GAMING=0|1` and `WITH_ANDROID=0|1`, and the
+installer doesn't ask about that module. A dry-run never asks, so a module
+it wasn't told to include is left out:
+
+```sh
+WITH_GAMING=1 WITH_ANDROID=0 ./install.sh --dry-run
+```
+
 On NVIDIA machines the installer installs `akmod-nvidia`, CUDA and the VA-API
 driver, and waits for akmods to build the kernel module before it finishes.
 It doesn't edit the kernel command line. With Secure Boot on, it creates the
@@ -44,7 +62,8 @@ manager and enter that password, or the NVIDIA module won't load.
 
 Tools that don't come from a dnf repo are installed from their upstream
 releases: starship and lazygit into `~/.local/bin`, and the OpenWhispr and
-Proton Mail rpms. Refresh them with:
+Proton Mail rpms, and Android Studio when the Android module is installed.
+Refresh them with:
 
 ```sh
 ./update.sh            # install anything with a newer release
@@ -52,8 +71,10 @@ Proton Mail rpms. Refresh them with:
 ```
 
 It skips anything already at its latest release, so it's safe to run often.
-The installer runs the same step (`installer/modules/80-releases.sh`) for the
-first install.
+It only refreshes Android Studio when `/opt/android-studio` exists, and never
+installs it. The installer runs the same steps
+(`installer/modules/80-releases.sh` and `85-android.sh`) for the first
+install.
 
 Layout:
 

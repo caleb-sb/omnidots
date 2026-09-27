@@ -1,0 +1,33 @@
+<!-- Trimmed from https://developer.android.com/studio (September 2026): the
+     download buttons for Linux, ChromeOS and Windows. -->
+          <a class="button button-primary
+               devsite-dialog-close gc-analytics-event"
+               data-category="studio_linux_bundle_download" data-action="download"
+              
+               href="https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.4.8/android-studio-quail4-patch1-linux.tar.gz"
+               id="agree-button__studio_linux_bundle_download"
+            >Download Android Studio Quail 4 | 2026.1.4 Patch 1
+             for
+              Linux
+          </a>
+            <p><em>android-studio-quail4-patch1-linux.tar.gz</em></p>
+          <a class="button button-primary
+               devsite-dialog-close gc-analytics-event"
+               data-category="studio_chrome_os_bundle_download" data-action="download"
+              
+               href="https://edgedl.me.gvt1.com/android/studio/install/2026.1.4.8/android-studio-quail4-patch1-cros.deb"
+               id="agree-button__studio_chrome_os_bundle_download"
+            >Download Android Studio Quail 4 | 2026.1.4 Patch 1
+             for
+              ChromeOS
+          </a>
+          <a class="button button-primary
+               devsite-dialog-close gc-analytics-event"
+               data-category="studio_win_bundle_download" data-action="download"
+              
+               href="https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.4.8/android-studio-quail4-patch1-windows.zip"
+               id="agree-button__studio_win_bundle_download"
+            >Download Android Studio Quail 4 | 2026.1.4 Patch 1
+             for
+              Windows
+          </a>

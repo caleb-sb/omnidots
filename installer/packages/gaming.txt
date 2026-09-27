@@ -1,0 +1,6 @@
+# The optional gaming module. One per line; `#` starts a comment.
+#
+# Discord and Heroic come from Flathub (see 65-gaming.sh).
+
+steam                 # from RPM Fusion nonfree
+xdotool               # hides Steam's window for the dontkillsteam.sh keybind

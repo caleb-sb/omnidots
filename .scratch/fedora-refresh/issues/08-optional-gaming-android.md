@@ -8,9 +8,9 @@ See spec: Package sources (Flathub, gaming), User Stories 6, 47–48, 52.
 
 **Status:** ready-for-agent
 
-- [ ] One up-front prompt covers both modules. Env vars can preselect them (for non-interactive runs and tests).
-- [ ] Gaming: Steam from RPM Fusion, and Discord and Heroic from Flathub. No ProtonUp-Qt, no GameMode.
-- [ ] Android: the official Android Studio tarball is installed into /opt with a desktop entry. The update command refreshes it only when the Android module was installed.
-- [ ] The dontkillsteam helper script keeps working.
-- [ ] bats asserts both modules are absent by default and present only when chosen, on at least two fixtures.
-- [ ] shellcheck passes.
+- [x] One up-front prompt covers both modules. Env vars can preselect them (for non-interactive runs and tests).
+- [x] Gaming: Steam from RPM Fusion, and Discord and Heroic from Flathub. No ProtonUp-Qt, no GameMode.
+- [x] Android: the official Android Studio tarball is installed into /opt with a desktop entry. The update command refreshes it only when the Android module was installed.
+- [x] The dontkillsteam helper script keeps working.
+- [x] bats asserts both modules are absent by default and present only when chosen, on at least two fixtures.
+- [x] shellcheck passes.

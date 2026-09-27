@@ -4,7 +4,8 @@
 # installer against a recorded hardware fixture and asserts on printed lines.
 # Release lookups read the responses recorded in fixtures/releases, and a stub
 # rpm reports nothing installed, so the plan needs no network and doesn't
-# depend on this machine.
+# depend on this machine. Android Studio's install dir is an empty temporary
+# /opt.
 
 bats_require_minimum_version 1.5.0
 
@@ -24,8 +25,9 @@ plan_for() {
   mkdir -p "$BATS_TEST_TMPDIR/home"
   run --separate-stderr env -u HAS_NVIDIA -u HAS_AMD_GPU -u HAS_INTEL_GPU \
     -u HAS_LEGACY_INTEL_GPU -u HAS_HYBRID_GPU -u HAS_BATTERY -u HAS_BACKLIGHT \
-    -u HAS_BLUETOOTH -u HAS_FPRINT -u XDG_CONFIG_HOME \
-    -u XDG_DATA_HOME HOME="$BATS_TEST_TMPDIR/home" \
+    -u HAS_BLUETOOTH -u HAS_FPRINT -u WITH_GAMING -u WITH_ANDROID \
+    -u XDG_CONFIG_HOME -u XDG_DATA_HOME HOME="$BATS_TEST_TMPDIR/home" \
+    OMNIDOTS_OPT_DIR="$BATS_TEST_TMPDIR/opt" \
     OMNIDOTS_SYSFS_ROOT="$FIXTURES/$fixture/sysfs" \
     OMNIDOTS_LSPCI_FILE="$FIXTURES/$fixture/lspci.txt" \
     OMNIDOTS_OS_RELEASE="$FIXTURES/os-release" \
@@ -121,12 +123,12 @@ repo: flathub" ]
   mkdir -p "$stubs"
   for cmd in sudo dnf rpm mokutil kmodgenca akmods modinfo systemctl tuned-adm \
     authselect fprintd-list fprintd-enroll curl gpg flatpak usermod rustup-init \
-    pnpm bun claude; do
+    pnpm bun claude tar; do
     printf '#!/bin/sh\necho "%s $*" >>"%s"\n' "$cmd" "$BATS_TEST_TMPDIR/calls" >"$stubs/$cmd"
     chmod +x "$stubs/$cmd"
   done
   for fixture in desktop hybrid-laptop core-ultra-laptop; do
-    plan_for "$fixture" PATH="$stubs:$PATH"
+    plan_for "$fixture" PATH="$stubs:$PATH" WITH_GAMING=1 WITH_ANDROID=1
     [ "$status" -eq 0 ]
   done
   # Only read-only queries ran: the installed versions of the release rpms.
@@ -497,4 +499,54 @@ pkg: akmod-nvidia" ]
     assert_line "pkg: gzip"
     refute_match '^repo: copr:atim/'
   done
+}
+
+@test "optional modules: neither gaming nor Android by default" {
+  for fixture in desktop core-ultra-laptop; do
+    plan_for "$fixture"
+    [ "$status" -eq 0 ]
+    assert_line "flag: WITH_GAMING=0"
+    assert_line "flag: WITH_ANDROID=0"
+    refute_match 'steam|xdotool|discord|heroic|android-studio'
+  done
+}
+
+@test "WITH_GAMING=1: Steam from RPM Fusion, Discord and Heroic from Flathub, nothing from Android" {
+  for fixture in desktop core-ultra-laptop; do
+    plan_for "$fixture" WITH_GAMING=1
+    [ "$status" -eq 0 ]
+    assert_line "flag: WITH_GAMING=1"
+    assert_line "flag: WITH_ANDROID=0"
+    assert_line "repo: rpmfusion-nonfree"
+    assert_line "pkg: steam"
+    assert_line "flatpak: com.discordapp.Discord"
+    assert_line "flatpak: com.heroicgameslauncher.hgl"
+    refute_match 'protonup|gamemode|android-studio'
+  done
+}
+
+@test "WITH_GAMING=1: xdotool, which the dontkillsteam keybind needs to hide Steam" {
+  plan_for desktop WITH_GAMING=1
+  [ "$status" -eq 0 ]
+  assert_line "pkg: xdotool"
+}
+
+@test "WITH_ANDROID=1: the latest Android Studio tarball into /opt with a desktop entry, nothing from gaming" {
+  local opt="$BATS_TEST_TMPDIR/opt"
+  for fixture in desktop core-ultra-laptop; do
+    plan_for "$fixture" WITH_ANDROID=1
+    [ "$status" -eq 0 ]
+    assert_line "flag: WITH_GAMING=0"
+    assert_line "flag: WITH_ANDROID=1"
+    assert_line "release: android-studio 2026.1.4.8 https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.4.8/android-studio-quail4-patch1-linux.tar.gz -> $opt/android-studio"
+    assert_line "conf: /usr/local/share/applications/android-studio.desktop Exec=$opt/android-studio/bin/studio"
+    refute_match 'steam|discord|heroic'
+  done
+}
+
+@test "rejects a module choice that isn't 0 or 1" {
+  plan_for desktop WITH_GAMING=yes
+  [ "$status" -eq 1 ]
+  plan_for desktop WITH_ANDROID=yes
+  [ "$status" -eq 1 ]
 }

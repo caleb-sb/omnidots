@@ -3,7 +3,7 @@
 # The update command run on its own in dry-run, against a temporary HOME.
 # Release lookups read the responses recorded in fixtures/releases, and a stub
 # rpm reports what's installed, so the plan doesn't depend on the network or
-# on this machine.
+# on this machine. Android Studio's install dir is a temporary /opt.
 
 bats_require_minimum_version 1.5.0
 
@@ -35,8 +35,18 @@ EOF
 }
 
 update() {
-  run --separate-stderr env OMNIDOTS_RELEASES_DIR="$FIXTURES/releases" \
-    PATH="$STUBS:$PATH" "$REPO_ROOT/update.sh" "$@"
+  run --separate-stderr env -u WITH_ANDROID \
+    OMNIDOTS_RELEASES_DIR="$FIXTURES/releases" \
+    OMNIDOTS_OPT_DIR="$BATS_TEST_TMPDIR/opt" PATH="$STUBS:$PATH" \
+    "$REPO_ROOT/update.sh" "$@"
+}
+
+# installed_android_studio [version] — an Android Studio in /opt, installed
+# by the Android module at that version, or by hand when none is given.
+installed_android_studio() {
+  local dir="$BATS_TEST_TMPDIR/opt/android-studio"
+  mkdir -p "$dir/bin"
+  [ -z "${1:-}" ] || printf '%s\n' "$1" >"$dir/.omnidots-version"
 }
 
 assert_line() {
@@ -105,7 +115,48 @@ installed_binary() {
   refute_match '^release: proton-mail '
 }
 
+@test "without Android Studio in /opt: never installs it" {
+  update --dry-run
+  [ "$status" -eq 0 ]
+  refute_match 'android'
+}
+
+@test "WITH_ANDROID=1 doesn't make it install Android Studio either" {
+  run --separate-stderr env WITH_ANDROID=1 \
+    OMNIDOTS_RELEASES_DIR="$FIXTURES/releases" \
+    OMNIDOTS_OPT_DIR="$BATS_TEST_TMPDIR/opt" PATH="$STUBS:$PATH" \
+    "$REPO_ROOT/update.sh" --dry-run
+  [ "$status" -eq 0 ]
+  refute_match 'android'
+}
+
+@test "refreshes an older Android Studio in /opt from the latest tarball" {
+  local opt="$BATS_TEST_TMPDIR/opt"
+  installed_android_studio 2026.1.3.6
+  update --dry-run
+  [ "$status" -eq 0 ]
+  assert_line "release: android-studio 2026.1.4.8 https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.4.8/android-studio-quail4-patch1-linux.tar.gz -> $opt/android-studio"
+  assert_line "conf: /usr/local/share/applications/android-studio.desktop Exec=$opt/android-studio/bin/studio"
+}
+
+@test "replaces an Android Studio installed by hand, whose version is unknown" {
+  local opt="$BATS_TEST_TMPDIR/opt"
+  installed_android_studio
+  update --dry-run
+  [ "$status" -eq 0 ]
+  assert_line "release: android-studio 2026.1.4.8 https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.4.8/android-studio-quail4-patch1-linux.tar.gz -> $opt/android-studio"
+}
+
+@test "skips an Android Studio already at the latest release" {
+  installed_android_studio 2026.1.4.8
+  update --dry-run
+  [ "$status" -eq 0 ]
+  assert_line "current: android-studio 2026.1.4.8"
+  refute_match '^(release|conf): .*android-studio'
+}
+
 @test "dry-run changes nothing: no installs, downloads or files" {
+  installed_android_studio 2026.1.3.6
   for cmd in sudo dnf curl tar install; do
     printf '#!/bin/sh\necho "%s $*" >>"%s"\n' "$cmd" "$BATS_TEST_TMPDIR/calls" >"$STUBS/$cmd"
     chmod +x "$STUBS/$cmd"
