@@ -127,7 +127,7 @@ is in use (up to 10). Click one to switch to it.
 
 ## Media
 
-A pill after the workspaces shows what Spotify is playing, as
+A pill on the right, next to the tray, shows what Spotify is playing, as
 "Title — Artist" cut to 30 characters with "…", followed by previous,
 play/pause and next buttons.
 

@@ -12,7 +12,7 @@ BarGroup {
     padding: 2
 
     Item {
-        implicitWidth: textRow.implicitWidth + 28
+        implicitWidth: label.implicitWidth + 28
         implicitHeight: root.implicitHeight
 
         StateLayer {
@@ -20,26 +20,13 @@ BarGroup {
             onClicked: Media.focus()
         }
 
-        Row {
-            id: textRow
+        StyledText {
+            id: label
 
             anchors.centerIn: parent
-            spacing: 8
-
-            MaterialIcon {
-                anchors.verticalCenter: parent.verticalCenter
-                text: "music_note"
-                size: 18
-                fill: 1
-                color: Theme.c.green
-            }
-
-            StyledText {
-                anchors.verticalCenter: parent.verticalCenter
-                text: Media.text
-                font.pixelSize: Theme.font.bar
-                color: Theme.c.fgDark
-            }
+            text: Media.text
+            font.pixelSize: Theme.font.bar
+            color: Theme.c.fgDark
         }
     }
 

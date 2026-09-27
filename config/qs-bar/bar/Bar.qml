@@ -211,9 +211,6 @@ Variants {
                 Workspaces {
                     screen: win.modelData
                 }
-
-                // Spotify's track and controls (hidden unless a track is loaded).
-                MediaPill {}
             }
 
             ClockText {
@@ -229,6 +226,9 @@ Variants {
                 anchors.rightMargin: Theme.bar.padding
                 anchors.verticalCenter: parent.verticalCenter
                 spacing: Theme.spacing.large
+
+                // Spotify's track and controls (hidden unless a track is loaded).
+                MediaPill {}
 
                 // Tray apps (hidden when there are none).
                 BarGroup {

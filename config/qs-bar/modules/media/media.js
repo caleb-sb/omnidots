@@ -38,5 +38,5 @@ function label(title, artist) {
     const chars = Array.from(a ? `${t} — ${a}` : t);
     if (chars.length <= MAX_CHARS)
         return chars.join("");
-    return chars.slice(0, MAX_CHARS - 1).join("").trimEnd() + "…";
+    return chars.slice(0, MAX_CHARS - 1).join("").replace(/\s+$/, "") + "…";
 }

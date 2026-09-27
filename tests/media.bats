@@ -13,14 +13,24 @@ setup() {
 }
 
 # js <expression> — evaluates the expression with the library's functions in
-# scope and prints the result as JSON.
+# scope and prints the result as JSON. Quickshell's JS engine (Qt's V4)
+# lacks the ES2019+ built-ins node has, so they're removed first: a library
+# that calls one works here but throws in the bar.
 js() {
   node - "$LIB" "$1" <<'EOF'
 const fs = require("fs"), vm = require("vm");
 const [lib, expr] = process.argv.slice(2);
-const M = {};
-vm.runInNewContext(fs.readFileSync(lib, "utf8").replace(/^\.pragma library$/m, ""), M);
-console.log(JSON.stringify(vm.runInNewContext(expr, M)));
+const M = vm.createContext({});
+vm.runInContext(`
+  for (const [proto, names] of [
+    [String.prototype, ["trimStart", "trimEnd", "matchAll", "replaceAll", "at"]],
+    [Array.prototype, ["flat", "flatMap", "at", "findLast", "findLastIndex"]],
+    [Object, ["fromEntries", "hasOwn"]],
+  ])
+    for (const name of names) delete proto[name];
+`, M);
+vm.runInContext(fs.readFileSync(lib, "utf8").replace(/^\.pragma library$/m, ""), M);
+console.log(JSON.stringify(vm.runInContext(expr, M)));
 EOF
 }
 
