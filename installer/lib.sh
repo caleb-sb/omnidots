@@ -10,7 +10,10 @@
 # release to install: `<name> <version> <url>`, an rpm dnf installs, or with
 # `-> <path>` a binary or unpacked tarball put there, current for one
 # already at the latest version, which is skipped, and deploy for a file or
-# directory from the repo copied into a system location: `<source> -> <dest>`).
+# directory from the repo copied into a system location: `<source> -> <dest>`,
+# and remove for something migrate.sh removes: `pkg <name>`, `flatpak <app
+# ID>`, `copr <owner/project>`, `repo <file>`, `keyring <label>` or
+# `path <path>`).
 # The tests assert on these lines, so keep the format stable.
 # Logging goes to stderr so it never mixes with the plan.
 

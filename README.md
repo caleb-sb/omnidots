@@ -84,7 +84,7 @@ authselect's fingerprint feature leaves alone, so the keyring unlocks.
 If the greeter fails (Quickshell errors or crashes, or Hyprland doesn't
 start), tuigreet takes over. `Ctrl+Alt+Backspace` on the login screen
 switches to tuigreet by hand, and `Ctrl+Alt+F2` reaches a text console.
-GDM stays installed but no longer starts.
+GDM stays installed but no longer starts; `./migrate.sh` removes it (see below).
 
 ## Update
 
@@ -109,10 +109,35 @@ installs it. A theme is replaced only when its pin changes. The installer
 runs the same steps (`installer/modules/35-theme-assets.sh`,
 `80-releases.sh` and `85-android.sh`) for the first install.
 
+## Migrating a machine set up by the old installer
+
+A one-off for the desktop that predates this installer: after `./install.sh`,
+it removes what the refresh dropped. That's the old packages (GDM, dunst,
+wofi, kanshi, waybar, wlogout, nm-applet, qt5ct, inxi, Podman, Firefox, the
+starship, lazygit and Discord rpms, and tuned-ppd and brightnessctl where
+there's no battery or backlight), the ProtonUp-Qt flatpak, the solopasha,
+SwayNotificationCenter and atim COPRs, the Mullvad repo and keyring entry, the
+theme copies and loose fonts the old installer put in `~/.icons`, `~/.themes`
+and `~/.local/share/fonts`, and links to config dirs the repo no longer has.
+
+```sh
+./migrate.sh --dry-run  # print what it would remove (`remove:`), and stop
+./migrate.sh            # print it, ask, then remove it
+```
+
+Anything already gone is skipped, so it's safe to re-run. Some items wait for
+their replacement: GDM until greetd is the display manager, the starship and
+lazygit rpms until their release binaries are in `~/.local/bin`, the Discord
+rpm until the Discord flatpak is installed, and each old theme copy until its
+replacement is in `~/.local/share`. A package that something staying
+installed requires is kept. It logs why it keeps each one. Packages go in one
+`dnf remove --noautoremove`, which shows its transaction and asks again.
+
 Layout:
 
 - `install.sh`: entry point
 - `update.sh`: refreshes what doesn't come from a dnf repo
+- `migrate.sh`: one-off removal of what the refresh dropped
 - `installer/lib.sh`: logging, batched package and flatpak install, flag
   check, dry-run, upstream release install
 - `installer/detect.sh`: capability detection
