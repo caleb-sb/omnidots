@@ -157,8 +157,6 @@ of the pill while it's open; clicking it closes the panel.
 - **Battery saver:** only with a laptop battery. Switches the CPU to the
   power-saver profile. It turns itself on at 20% while discharging and off
   when you plug in. Toggling it by hand wins until the next plug or unplug.
-- **Sleep after:** suspend after 5, 15, 30 or 60 idle minutes, or never. Idle
-  inhibitors (video players, games) hold it off.
 
 **Power profiles** go through Quickshell's PowerProfiles service, which
 tuned-ppd serves on laptops. The bar only touches the profile when there's
@@ -171,6 +169,11 @@ to throughput-performance), and game mode there is only the visual changes.
 **Low battery:** a notification at 20% and a critical one at 10% while
 discharging, each once until you plug in again. Nothing suspends.
 
-Game mode, battery saver and the sleep timer are saved to `power.json` in
+**Idle:** after 10 idle minutes the screen locks with hyprlock (unless it's
+already locked), and after 15 the displays turn off through Hyprland's DPMS
+dispatcher. Any input turns them back on. Idle inhibitors (video players,
+games) hold both off. Nothing suspends on idle.
+
+Game mode and battery saver are saved to `power.json` in
 the Quickshell state dir. IPC: `ipc call power toggle | gameMode`,
 `ipc call system toggle`.

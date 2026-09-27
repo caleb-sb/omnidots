@@ -7,7 +7,7 @@ import qs.config
 import qs.components
 
 // Power panel (Super+X): session actions, battery and battery saver (when
-// there is a laptop battery) and the sleep timer. Keys run an action straight away, as wlogout did:
+// there is a laptop battery). Keys run an action straight away, as wlogout did:
 // L lock, E log out, R restart, S shut down. With the mouse, log out,
 // restart and shut down need a second click.
 Item {
@@ -91,7 +91,7 @@ Item {
                 StyledText {
                     font.pixelSize: Theme.font.small
                     color: Theme.c.comment
-                    text: Power.sleepMinutes > 0 ? `Sleeps after ${Power.sleepMinutes < 60 ? `${Power.sleepMinutes} min` : `${Power.sleepMinutes / 60} h`} idle` : "Never sleeps"
+                    text: `Locks after ${Power.lockMinutes} min idle`
                 }
             }
         }
@@ -173,81 +173,6 @@ Item {
             sublabel: Power.batterySaver ? "Power-saver profile" : Power.gameMode ? "Off while game mode is on" : "Turns on at 20% on battery"
             checked: Power.batterySaver
             onClicked: Power.setBatterySaver(!Power.batterySaver)
-        }
-
-        // ── Sleep after ───────────────────────────────────────────
-        Rectangle {
-            Layout.fillWidth: true
-            implicitHeight: sleepCol.implicitHeight + 28
-            radius: Theme.rounding.normal
-            color: Theme.c.bgHighlight
-
-            ColumnLayout {
-                id: sleepCol
-
-                anchors.fill: parent
-                anchors.margins: 14
-                spacing: 12
-
-                RowLayout {
-                    spacing: Theme.spacing.normal
-
-                    MaterialIcon {
-                        size: 20
-                        fill: Power.sleepMinutes > 0 ? 1 : 0
-                        text: "bedtime"
-                        color: Power.sleepMinutes > 0 ? Theme.c.blue : Theme.c.comment
-                    }
-                    StyledText {
-                        text: "Sleep after"
-                        font.weight: Font.DemiBold
-                    }
-                }
-
-                // Segmented choice of idle timeouts.
-                RowLayout {
-                    Layout.fillWidth: true
-                    spacing: 4
-
-                    Repeater {
-                        model: Power.sleepSteps
-
-                        Rectangle {
-                            id: chip
-
-                            required property int modelData
-                            readonly property bool selected: Power.sleepMinutes === modelData
-
-                            Layout.fillWidth: true
-                            implicitHeight: 34
-                            radius: selected ? height / 2 : Theme.rounding.small
-                            color: selected ? Theme.c.blue : Theme.c.bg
-
-                            Behavior on color {
-                                CAnim {}
-                            }
-                            Behavior on radius {
-                                Anim {
-                                    duration: Theme.anim.fastDuration
-                                }
-                            }
-
-                            StateLayer {
-                                color: chip.selected ? Theme.c.bgDark : Theme.c.fg
-                                onClicked: Power.sleepMinutes = chip.modelData
-                            }
-
-                            StyledText {
-                                anchors.centerIn: parent
-                                text: chip.modelData === 0 ? "Never" : chip.modelData < 60 ? `${chip.modelData}m` : `${chip.modelData / 60}h`
-                                font.pixelSize: Theme.font.small
-                                font.weight: chip.selected ? Font.DemiBold : Font.Normal
-                                color: chip.selected ? Theme.c.bgDark : Theme.c.fgDark
-                            }
-                        }
-                    }
-                }
-            }
         }
     }
 

@@ -8,8 +8,8 @@ See spec: qs-bar (Idle), User Story 89.
 
 **Status:** ready-for-agent
 
-- [ ] The power module's idle monitor is repurposed: lock at 10 minutes and DPMS off at 15 minutes through Hyprland's dispatcher. Input wakes the displays.
-- [ ] Idle inhibitors are respected.
-- [ ] Suspend-on-idle and the sleep-minutes setting and its UI are removed, and saved state with the old key still loads.
-- [ ] The lock action doesn't start a second hyprlock if one is already running.
-- [ ] Smoke check: qs-bar loads without QML errors where a session is available.
+- [x] The power module's idle monitor is repurposed: lock at 10 minutes and DPMS off at 15 minutes through Hyprland's dispatcher. Input wakes the displays.
+- [x] Idle inhibitors are respected.
+- [x] Suspend-on-idle and the sleep-minutes setting and its UI are removed, and saved state with the old key still loads.
+- [x] The lock action doesn't start a second hyprlock if one is already running.
+- [x] Smoke check: qs-bar loads without QML errors where a session is available.

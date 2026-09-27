@@ -9,15 +9,15 @@ import Quickshell.Services.UPower
 import qs.modules.notifications
 import "power.js" as Logic
 
-// Session actions, sleep-after-idle, game mode, battery saver and the CPU
-// power profile. Settings are kept in the Quickshell state dir so they
-// survive restarts.
+// Session actions, idle lock and display off, game mode, battery saver and
+// the CPU power profile. Settings are kept in the Quickshell state dir so
+// they survive restarts.
 Singleton {
     id: root
 
-    // Minutes of idle before suspending; 0 = never.
-    property int sleepMinutes: 0
-    readonly property list<int> sleepSteps: [0, 5, 15, 30, 60]
+    // Idle lock, then displays off.
+    readonly property int lockMinutes: 10
+    readonly property int displayOffMinutes: 15
     // Game mode, battery saver and the last battery reading (power.js).
     property var st: Logic.initial()
     // Blur, animations, window transparency and notification popups off;
@@ -44,10 +44,6 @@ Singleton {
 
     function lock(): void {
         Quickshell.execDetached(["sh", "-c", "pidof hyprlock || hyprlock"]);
-    }
-    function suspend(): void {
-        // Lock first so the session is locked on wake.
-        Quickshell.execDetached(["sh", "-c", "pidof hyprlock || { hyprlock & sleep 1; }; systemctl suspend"]);
     }
     function logout(): void {
         Hyprland.dispatch("hl.dsp.exit()");
@@ -116,7 +112,6 @@ Singleton {
         st = Logic.battery(st, SysStats.batteryReading);
         saveTimer.restart();
     }
-    onSleepMinutesChanged: saveTimer.restart()
 
     Binding {
         target: Notifs
@@ -134,13 +129,21 @@ Singleton {
         }
     }
 
+    // Idle: lock, then turn the displays off. Nothing suspends on idle (the
+    // lid does that, in hypr/monitors.lua). Video players and games that
+    // inhibit idle hold both off.
     IdleMonitor {
-        enabled: root.sleepMinutes > 0
-        timeout: root.sleepMinutes * 60
-        // Video players and games that inhibit idle keep the machine awake.
+        timeout: root.lockMinutes * 60
         respectInhibitors: true
         onIsIdleChanged: if (isIdle)
-            root.suspend()
+            root.lock()
+    }
+    // Any input wakes the displays. Hyprland's key_press/mouse_move_enables_dpms
+    // (hyprland.lua) do the same without qs-bar; this also covers touch.
+    IdleMonitor {
+        timeout: root.displayOffMinutes * 60
+        respectInhibitors: true
+        onIsIdleChanged: Hyprland.dispatch(`hl.dsp.dpms({ action = "${isIdle ? "disable" : "enable"}" })`)
     }
 
     // ── Persistence ───────────────────────────────────────────────
@@ -151,9 +154,7 @@ Singleton {
 
         interval: 500
         onTriggered: if (root.loaded)
-            storage.setText(JSON.stringify(Object.assign({
-                sleepMinutes: root.sleepMinutes
-            }, root.st)))
+            storage.setText(JSON.stringify(root.st))
     }
 
     FileView {
@@ -165,7 +166,6 @@ Singleton {
         onLoaded: {
             try {
                 const data = JSON.parse(text());
-                root.sleepMinutes = data.sleepMinutes ?? 0;
                 root.st = Logic.restore(data);
             } catch (e) {
                 console.warn("power: bad state file,", e);

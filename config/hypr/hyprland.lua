@@ -101,6 +101,9 @@ hl.config({
 
     misc = {
         force_default_wallpaper = 0,
+        -- Input wakes displays that qs-bar's idle monitor turned off.
+        key_press_enables_dpms = true,
+        mouse_move_enables_dpms = true,
     },
 })
 
