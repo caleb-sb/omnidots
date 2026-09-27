@@ -7,7 +7,8 @@ set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 
 mapfile -t scripts < <(git ls-files --cached --others --exclude-standard \
-  'install.sh' 'update.sh' 'migrate.sh' 'installer/*.sh' 'tests/*.sh' 'tests/*.bats')
+  'install.sh' 'update.sh' 'migrate.sh' 'installer/*.sh' 'tests/*.sh' 'tests/*.bats' \
+  'config/hypr/scripts/lockinfo.sh')
 
 shellcheck --external-sources "${scripts[@]}"
 bats tests/
