@@ -121,6 +121,29 @@ Settings for one machine, such as a monitor's mode, position or scale, go in
 cp ~/.config/hypr/override.example.lua ~/.config/hypr/override.lua
 ```
 
+### Monitors and the lid
+
+`config/hypr/monitors.lua` lays out the outputs when Hyprland starts or
+reloads and whenever a monitor is plugged in or out, on every machine:
+
+- With an external monitor connected, the first by connector name (DP before
+  HDMI-A, DP-2 before DP-10) is primary. It gets workspaces 1–10, the focus
+  and cursor, qs-bar's full bar and notification popups, and the XWayland
+  primary. To prefer another output, set `require("monitors").primary` in
+  `override.lua` (see `override.example.lua`).
+- A laptop's built-in panel sits below the external monitor, and turns off
+  while the lid is closed. Undocked, the panel is primary at its preferred
+  mode with automatic position and scale.
+- Closing the lid undocked locks with hyprlock and then suspends, on a machine
+  with a battery. Without a battery it does nothing. While Hyprland runs on a
+  laptop it holds logind's lid-switch inhibitor, so logind doesn't suspend on
+  its own.
+- `Super+Shift+M` turns the built-in panel off and on again, for when Hyprland
+  leaves it off after an external monitor is unplugged.
+
+A machine without a built-in panel, like the desktop, keeps its monitor rules
+as they are.
+
 ## Development
 
 ```sh

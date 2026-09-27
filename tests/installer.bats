@@ -99,6 +99,14 @@ repo: flathub" ]
   done
 }
 
+@test "every machine: xrandr, which sets the XWayland primary output" {
+  for fixture in desktop core-ultra-laptop; do
+    plan_for "$fixture"
+    [ "$status" -eq 0 ]
+    assert_line "pkg: xrandr"
+  done
+}
+
 @test "plans linking the dotfiles into a fresh HOME and changes nothing" {
   plan_for desktop
   [ "$status" -eq 0 ]

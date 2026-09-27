@@ -6,13 +6,14 @@ import Quickshell
 import Quickshell.Wayland
 import qs.config
 import qs.components
+import qs.modules.display
 
 // Popup toasts, top-right under the bar. They slide in from the screen edge
 // and back out when they time out or are dismissed.
 PanelWindow {
     id: root
 
-    screen: Quickshell.screens[0]
+    screen: PrimaryScreen.screen
     anchors {
         top: true
         right: true

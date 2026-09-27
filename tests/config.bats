@@ -102,9 +102,10 @@ nvidia_loaded() {
 }
 
 # hypr_stub <config-dir> <lua-chunk> — the env and monitor rules the chunk
-# sets through Hyprland's hl table (see hypr-stub.lua).
+# sets through Hyprland's hl table (see hypr-stub.lua). Files the config
+# writes to $XDG_RUNTIME_DIR land in the test's temporary directory.
 hypr_stub() {
-  luajit "$BATS_TEST_DIRNAME/hypr-stub.lua" "$1" "$2"
+  XDG_RUNTIME_DIR="$BATS_TEST_TMPDIR" luajit "$BATS_TEST_DIRNAME/hypr-stub.lua" "$1" "$2"
 }
 
 # gpu_env <root> — the GPU environment Hyprland gets on the machine at <root>.
@@ -152,8 +153,10 @@ gpu_env() {
   mkdir -p "$dir"
   cp "$CONFIG"/hypr/*.lua "$dir/"
   rm -f "$dir/override.lua" # this machine's own, if any
+  # An empty machine for monitors.lua to read, so this one's panel, if any,
+  # doesn't add rules.
   # shellcheck disable=SC2016 # Lua code
-  local main='dofile(CONFIG_DIR .. "/hyprland.lua")'
+  local main='require("monitors").root = CONFIG_DIR; dofile(CONFIG_DIR .. "/hyprland.lua")'
 
   run -0 hypr_stub "$dir" "$main"
   [ "$(grep '^monitor' <<<"$output")" = 'monitor  preferred auto auto' ]
@@ -161,6 +164,12 @@ gpu_env() {
   cp "$CONFIG/hypr/override.example.lua" "$dir/override.lua"
   run -0 hypr_stub "$dir" "$main"
   [ "${lines[-1]}" = 'monitor DP-2 3840x2160@144 0x0 1.5' ]
+}
+
+@test "swaylock is gone, and so is kanshi's config: Hyprland handles the lid and monitors" {
+  run grep -rIl swaylock "$CONFIG" "$BATS_TEST_DIRNAME/../installer" "$BATS_TEST_DIRNAME/../README.md"
+  [ "$output" = "" ]
+  [ ! -e "$CONFIG/kanshi" ]
 }
 
 @test "kitty's includes, and the files its ssh kitten copies, all exist" {

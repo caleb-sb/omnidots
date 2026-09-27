@@ -14,7 +14,7 @@ Singleton {
     readonly property list<real> steps: [1.5, 2.5]
     readonly property real normal: steps[0]
 
-    readonly property HyprlandMonitor monitor: Hyprland.monitorFor(Quickshell.screens[0])
+    readonly property HyprlandMonitor monitor: Hyprland.monitorFor(PrimaryScreen.screen)
     readonly property real reported: monitor?.scale ?? normal
     // Scale just asked for, until Hyprland reports it back, so quick
     // repeated clicks keep stepping instead of re-reading the old value.

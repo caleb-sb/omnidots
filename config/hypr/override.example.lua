@@ -16,3 +16,8 @@ hl.monitor({
     position = "0x0",
     scale    = 1.5,
 })
+
+-- Example: make HDMI-A-1 the primary output whenever it's connected, instead
+-- of the first external output by connector name. A list names several in
+-- order of preference, e.g. { "DP-3", "HDMI-A-1" }. See monitors.lua.
+-- require("monitors").primary = "HDMI-A-1"

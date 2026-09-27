@@ -33,6 +33,7 @@ grim                  # screenshots
 slurp                 # select a screen region
 swappy                # screenshot editing
 wl-clipboard
+xrandr                # sets the XWayland primary output (hypr/monitors.lua)
 nm-connection-editor
 kvantum
 qt6ct

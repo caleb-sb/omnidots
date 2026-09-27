@@ -56,7 +56,7 @@ Variants {
         // `qs -p <dir> ipc call bluetooth toggle` (bind it to a key if you like).
         IpcHandler {
             target: "bluetooth"
-            enabled: win.modelData === Quickshell.screens[0]
+            enabled: win.modelData === PrimaryScreen.screen
 
             function toggle(): void {
                 popout.toggle("bluetooth", btIcon, btPanel);
@@ -66,7 +66,7 @@ Variants {
         // `ipc call notifications toggle | dnd | clear`
         IpcHandler {
             target: "notifications"
-            enabled: win.modelData === Quickshell.screens[0]
+            enabled: win.modelData === PrimaryScreen.screen
 
             function toggle(): void {
                 popout.toggle("notifications", notifIcon, notifPanel);
@@ -91,7 +91,7 @@ Variants {
         // `ipc call display toggle`: switch between 1.5x and 2x scale.
         IpcHandler {
             target: "display"
-            enabled: win.modelData === Quickshell.screens[0]
+            enabled: win.modelData === PrimaryScreen.screen
 
             function toggle(): void {
                 DisplayScale.toggle();
@@ -100,7 +100,7 @@ Variants {
 
         IpcHandler {
             target: "calendar"
-            enabled: win.modelData === Quickshell.screens[0]
+            enabled: win.modelData === PrimaryScreen.screen
 
             function toggle(): void {
                 popout.toggle("calendar", clock, calendarPanel);
@@ -109,7 +109,7 @@ Variants {
 
         IpcHandler {
             target: "clipboard"
-            enabled: win.modelData === Quickshell.screens[0]
+            enabled: win.modelData === PrimaryScreen.screen
 
             function toggle(): void {
                 popout.toggle("clipboard", clipIcon, clipPanel);
@@ -118,7 +118,7 @@ Variants {
 
         IpcHandler {
             target: "network"
-            enabled: win.modelData === Quickshell.screens[0]
+            enabled: win.modelData === PrimaryScreen.screen
 
             function toggle(): void {
                 popout.toggle("network", netIcon, netPanel);
@@ -127,7 +127,7 @@ Variants {
 
         IpcHandler {
             target: "audio"
-            enabled: win.modelData === Quickshell.screens[0]
+            enabled: win.modelData === PrimaryScreen.screen
 
             function toggle(): void {
                 popout.toggle("audio", audioIcon, audioPanel);
@@ -137,7 +137,7 @@ Variants {
         // `ipc call power toggle` (Super+X) | gameMode
         IpcHandler {
             target: "power"
-            enabled: win.modelData === Quickshell.screens[0]
+            enabled: win.modelData === PrimaryScreen.screen
 
             function toggle(): void {
                 popout.toggle("power", powerGroup, powerPanel);
@@ -149,7 +149,7 @@ Variants {
 
         IpcHandler {
             target: "system"
-            enabled: win.modelData === Quickshell.screens[0]
+            enabled: win.modelData === PrimaryScreen.screen
 
             function toggle(): void {
                 popout.toggle("system", stats, systemPanel);

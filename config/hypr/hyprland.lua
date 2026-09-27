@@ -17,7 +17,8 @@ mainMod = "SUPER"
 ------------------
 
 -- Every output at its preferred mode, placed and scaled automatically. Modes
--- for one machine go in override.lua (see override.example.lua).
+-- for one machine go in override.lua (see override.example.lua). On a laptop,
+-- monitors.lua places the outputs and turns the built-in panel off and on.
 hl.monitor({
     output   = "",
     mode     = "preferred",
@@ -172,3 +173,7 @@ if override then
     override:close()
     require("override")
 end
+
+-- Monitor layout, primary output and the lid (see monitors.lua). Last, so it
+-- sees the primary override.lua picks.
+require("monitors").setup()

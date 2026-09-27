@@ -69,7 +69,14 @@ hl.bind("XF86AudioRaiseVolume",  hl.dsp.exec_cmd("~/.config/hypr/scripts/volumec
 hl.bind("XF86MonBrightnessUp",   hl.dsp.exec_cmd("~/.config/hypr/scripts/brightnesscontrol.sh i"),   { locked = true, repeating = true })
 hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("~/.config/hypr/scripts/brightnesscontrol.sh d"),   { locked = true, repeating = true })
 
-hl.bind("switch:on:Lid Switch", hl.dsp.exec_cmd("swaylock && systemctl suspend"), { locked = true })
+---- Monitors and the lid (see monitors.lua) ----
+
+local monitors = require("monitors")
+hl.bind("switch:on:Lid Switch",  function() monitors.lid(true) end,  { locked = true })
+hl.bind("switch:off:Lid Switch", function() monitors.lid(false) end, { locked = true })
+-- Turn the built-in panel off and on again, for when Hyprland leaves it off
+-- after an external monitor is unplugged.
+hl.bind(mainMod .. " + SHIFT + M", function() monitors.force_panel() end, { locked = true })
 
 ---- OpenWhispr ----
 -- The one place this bind lives. OpenWhispr also writes it to
