@@ -118,7 +118,8 @@ starship, lazygit and Discord rpms, and tuned-ppd and brightnessctl where
 there's no battery or backlight), the ProtonUp-Qt flatpak, the solopasha,
 SwayNotificationCenter and atim COPRs, the Mullvad repo and keyring entry, the
 theme copies and loose fonts the old installer put in `~/.icons`, `~/.themes`
-and `~/.local/share/fonts`, and links to config dirs the repo no longer has.
+and `~/.local/share/fonts` (and `~/.icons` and `~/.themes` themselves once
+nothing else is in them), and links to config dirs the repo no longer has.
 
 ```sh
 ./migrate.sh --dry-run  # print what it would remove (`remove:`), and stop

@@ -166,6 +166,24 @@ gpu_env() {
   [ "${lines[-1]}" = 'monitor DP-2 3840x2160@144 0x0 1.5' ]
 }
 
+@test "apps launched from Hyprland find ~/.local/bin, which greetd's login PATH lacks" {
+  command -v luajit >/dev/null || skip "luajit is not installed"
+  local dir="$BATS_TEST_TMPDIR/hypr"
+  mkdir -p "$dir"
+  cp "$CONFIG"/hypr/*.lua "$dir/"
+  rm -f "$dir/override.lua"
+  # shellcheck disable=SC2016 # Lua code
+  local main='require("monitors").root = CONFIG_DIR; dofile(CONFIG_DIR .. "/hyprland.lua")'
+
+  # As greetd starts it: /etc/profile and ~/.profile, no ~/.local/bin.
+  PATH="/usr/local/bin:/usr/bin:$PATH" HOME=/home/u run -0 hypr_stub "$dir" "$main"
+  [ "$(grep '^env PATH=' <<<"$output")" = "env PATH=/home/u/.local/bin:/usr/local/bin:/usr/bin:$PATH" ]
+
+  # Started from a login shell that already has it: left alone.
+  PATH="/home/u/.local/bin:$PATH" HOME=/home/u run -0 hypr_stub "$dir" "$main"
+  [[ $'\n'"$output" != *$'\n'"env PATH="* ]]
+}
+
 # binds <keys...> — what each key runs, as show_bind prints it (see
 # hypr-stub.lua), with the whole Hyprland config loaded.
 binds() {

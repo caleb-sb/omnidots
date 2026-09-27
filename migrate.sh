@@ -262,6 +262,16 @@ find_paths() {
   for copy in "${OLD_THEME_COPIES[@]}"; do
     want_paths "${copy#*=}" "${copy%%=*}"
   done
+  # ~/.icons and ~/.themes themselves, once nothing would be left in them.
+  local dir entry
+  for dir in "$HOME/.icons" "$HOME/.themes"; do
+    [[ -d $dir && ! -L $dir ]] || continue
+    for entry in "$dir"/* "$dir"/.[!.]* "$dir"/..?*; do
+      [[ -e $entry || -L $entry ]] || continue
+      [[ " ${REMOVE_PATHS[*]} " == *" $entry "* ]] || continue 2
+    done
+    REMOVE_PATHS+=("$dir")
+  done
   # The Nerd Font zip's files, which the old installer unpacked loose.
   want_paths "$FONTS_DIR/JetBrainsMonoNerdFont" \
     "$FONTS_DIR"/JetBrainsMono*NerdFont*.ttf "$FONTS_DIR"/{OFL.txt,README.md}

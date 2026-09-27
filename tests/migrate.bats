@@ -184,6 +184,8 @@ remove: path HOME/.icons/hyprcursors
 remove: path HOME/.icons/Tela-circle-purple
 remove: path HOME/.icons/Tela-circle-purple-dark
 remove: path HOME/.themes/Andromeda-dark
+remove: path HOME/.icons
+remove: path HOME/.themes
 remove: path HOME/.local/share/fonts/JetBrainsMonoNLNerdFontMono-Bold.ttf
 remove: path HOME/.local/share/fonts/JetBrainsMonoNerdFont-Regular.ttf
 remove: path HOME/.local/share/fonts/OFL.txt
@@ -325,7 +327,26 @@ assert_calls() {
   touch "$HOME/.local/share/fonts/Inter-Regular.ttf" "$HOME/.local/share/fonts/JetBrainsMono-Regular.ttf"
   migrate --dry-run
   [ "$status" -eq 0 ]
-  assert_output "$(all_removals)"
+  # ~/.icons and ~/.themes stay too, since they won't end up empty.
+  assert_removals_except "remove: path HOME/.icons" "remove: path HOME/.themes"
+}
+
+@test "removes ~/.icons and ~/.themes when they're already empty" {
+  everything_present
+  rm -r "$HOME"/.icons/* "$HOME"/.themes/*
+  migrate --dry-run
+  [ "$status" -eq 0 ]
+  assert_removals_except "remove: path HOME/.icons/Bibata-Modern-Ice" \
+    "remove: path HOME/.icons/hyprcursors" "remove: path HOME/.icons/Tela-circle-purple" \
+    "remove: path HOME/.icons/Tela-circle-purple-dark" "remove: path HOME/.themes/Andromeda-dark"
+}
+
+@test "keeps ~/.icons when a hidden file is left in it" {
+  everything_present
+  touch "$HOME/.icons/.keep"
+  migrate --dry-run
+  [ "$status" -eq 0 ]
+  assert_removals_except "remove: path HOME/.icons"
 }
 
 @test "only removes config links into the repo that no longer resolve" {
@@ -389,6 +410,8 @@ busctl --user call org.freedesktop.secrets /org/freedesktop/secrets/collection/l
 fc-cache -f"
   [ ! -e "$HOME/.icons/Bibata-Modern-Ice" ]
   [ ! -e "$HOME/.themes/Andromeda-dark" ]
+  [ ! -e "$HOME/.icons" ]
+  [ ! -e "$HOME/.themes" ]
   [ ! -e "$HOME/.local/share/fonts/OFL.txt" ]
   [ ! -L "$HOME/.config/qt5ct" ]
   [ -L "$HOME/.config/fish" ]

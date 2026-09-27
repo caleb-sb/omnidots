@@ -47,6 +47,14 @@ hl.env("XDG_DATA_HOME",   home .. "/.local/share")
 hl.env("XDG_CACHE_HOME",  home .. "/.cache")
 hl.env("XDG_STATE_HOME",  home .. "/.local/state")
 
+-- greetd's login sources /etc/profile and ~/.profile only, so its PATH lacks
+-- ~/.local/bin (starship, lazygit, claude); fish adds it, but apps launched
+-- straight from Hyprland, like nvim in kitty, need it too.
+local path = os.getenv("PATH") or ""
+if not (":" .. path .. ":"):find(":" .. home .. "/.local/bin:", 1, true) then
+    hl.env("PATH", home .. "/.local/bin:" .. path)
+end
+
 -- NVIDIA and multi-GPU variables, detected on this machine (see gpu.lua).
 require("gpu").apply()
 
