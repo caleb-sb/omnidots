@@ -10,7 +10,7 @@ hl.bind(mainMod .. " + F",         hl.dsp.window.fullscreen({ action = "toggle" 
 hl.bind(mainMod .. " + X",         hl.dsp.exec_cmd("qs -p ~/.config/qs-bar ipc call power toggle"))
 hl.bind(mainMod .. " + T",         hl.dsp.exec_cmd(term))
 hl.bind(mainMod .. " + E",         hl.dsp.exec_cmd(file))
-hl.bind(mainMod .. " + A",         hl.dsp.exec_cmd("pkill wofi || wofi"))
+hl.bind(mainMod .. " + A",         hl.dsp.exec_cmd("pkill -x rofi || rofi -show drun"))
 hl.bind(mainMod .. " + P",         hl.dsp.exec_cmd('grim -g "$(slurp -d)" - | wl-copy'))
 hl.bind(mainMod .. " + CTRL + P",  hl.dsp.exec_cmd('grim -g "$(slurp)"'))
 hl.bind(mainMod .. " + V",         hl.dsp.exec_cmd("pkill -x rofi || ~/.config/hypr/scripts/cliphist.sh c"))
@@ -72,6 +72,7 @@ hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("~/.config/hypr/scripts/brightn
 hl.bind("switch:on:Lid Switch", hl.dsp.exec_cmd("swaylock && systemctl suspend"), { locked = true })
 
 ---- OpenWhispr ----
--- This config uses the Lua provider, so OpenWhispr's ~/.config/hypr/openwhispr-binds.conf
--- (legacy `source` format) is never loaded. Keep this bind in sync with that file by hand.
+-- The one place this bind lives. OpenWhispr also writes it to
+-- ~/.config/hypr/openwhispr-binds.conf (gitignored), in the legacy format this
+-- Lua config never loads.
 hl.bind("CTRL + ALT + K", hl.dsp.exec_cmd("dbus-send --session --type=method_call --dest=com.openwhispr.App /com/openwhispr/App com.openwhispr.App.Toggle"))

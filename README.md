@@ -110,6 +110,17 @@ first.
 Files that apps rewrite with machine state are gitignored: fish's
 `fish_variables` and OpenWhispr's `hypr/openwhispr-binds.conf`.
 
+### Per-machine Hyprland settings
+
+The Hyprland config is shared by every machine. It detects the GPUs when it
+loads (`config/hypr/gpu.lua`) and gives every monitor its preferred mode.
+Settings for one machine, such as a monitor's mode, position or scale, go in
+`~/.config/hypr/override.lua`, which is gitignored and loaded last:
+
+```sh
+cp ~/.config/hypr/override.example.lua ~/.config/hypr/override.lua
+```
+
 ## Development
 
 ```sh

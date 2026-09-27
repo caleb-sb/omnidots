@@ -86,6 +86,83 @@ gsettings_value() {
   done
 }
 
+# fake_gpu <root> <card> <vendor> <class> — a DRM card under <root>/sys backed
+# by a PCI GPU, e.g. fake_gpu "$root" card1 10de 0302.
+fake_gpu() {
+  mkdir -p "$1/sys/class/drm/$2/device"
+  printf '0x%s\n' "$3" >"$1/sys/class/drm/$2/device/vendor"
+  printf '0x%s00\n' "$4" >"$1/sys/class/drm/$2/device/class"
+}
+
+# nvidia_loaded <root> — the proc entry the NVIDIA driver creates when loaded.
+nvidia_loaded() {
+  mkdir -p "$1/proc/driver/nvidia"
+  echo 'NVRM version: NVIDIA UNIX Open Kernel Module for x86_64  580.95.05' \
+    >"$1/proc/driver/nvidia/version"
+}
+
+# hypr_stub <config-dir> <lua-chunk> — the env and monitor rules the chunk
+# sets through Hyprland's hl table (see hypr-stub.lua).
+hypr_stub() {
+  luajit "$BATS_TEST_DIRNAME/hypr-stub.lua" "$1" "$2"
+}
+
+# gpu_env <root> — the GPU environment Hyprland gets on the machine at <root>.
+gpu_env() {
+  hypr_stub "$CONFIG/hypr" "require('gpu').apply('$1')"
+}
+
+@test "with the NVIDIA driver loaded on the desktop, Hyprland gets the NVIDIA env and picks its GPU itself" {
+  command -v luajit >/dev/null || skip "luajit is not installed"
+  local root="$BATS_TEST_TMPDIR/desktop"
+  # AMD Cezanne iGPU plus an RTX 3060 Ti with outputs of its own.
+  fake_gpu "$root" card1 1002 0300
+  fake_gpu "$root" card2 10de 0300
+  nvidia_loaded "$root"
+  run -0 gpu_env "$root"
+  [ "$output" = "$(printf '%s\n' \
+    'env LIBVA_DRIVER_NAME=nvidia' \
+    'env __GLX_VENDOR_LIBRARY_NAME=nvidia' \
+    'env NVD_BACKEND=direct')" ]
+}
+
+@test "without the NVIDIA driver loaded, no NVIDIA env is set" {
+  command -v luajit >/dev/null || skip "luajit is not installed"
+  local root="$BATS_TEST_TMPDIR/nouveau"
+  fake_gpu "$root" card1 1002 0300
+  fake_gpu "$root" card2 10de 0300
+  run -0 gpu_env "$root"
+  [ "$output" = "" ]
+}
+
+@test "on a hybrid laptop, the integrated GPU is Hyprland's first DRM device" {
+  command -v luajit >/dev/null || skip "luajit is not installed"
+  local root="$BATS_TEST_TMPDIR/hybrid"
+  # The display-less NVIDIA dGPU enumerates before the Intel iGPU.
+  fake_gpu "$root" card0 10de 0302
+  fake_gpu "$root" card1 8086 0300
+  nvidia_loaded "$root"
+  run -0 gpu_env "$root"
+  [ "$output" = 'env AQ_DRM_DEVICES=/dev/dri/card1:/dev/dri/card0' ]
+}
+
+@test "Hyprland falls back to preferred monitor modes, and a per-machine override.lua is loaded last" {
+  command -v luajit >/dev/null || skip "luajit is not installed"
+  local dir="$BATS_TEST_TMPDIR/hypr"
+  mkdir -p "$dir"
+  cp "$CONFIG"/hypr/*.lua "$dir/"
+  rm -f "$dir/override.lua" # this machine's own, if any
+  # shellcheck disable=SC2016 # Lua code
+  local main='dofile(CONFIG_DIR .. "/hyprland.lua")'
+
+  run -0 hypr_stub "$dir" "$main"
+  [ "$(grep '^monitor' <<<"$output")" = 'monitor  preferred auto auto' ]
+
+  cp "$CONFIG/hypr/override.example.lua" "$dir/override.lua"
+  run -0 hypr_stub "$dir" "$main"
+  [ "${lines[-1]}" = 'monitor DP-2 3840x2160@144 0x0 1.5' ]
+}
+
 @test "kitty's includes, and the files its ssh kitten copies, all exist" {
   local file refs
   for file in "$CONFIG"/kitty/*.conf; do

@@ -1,3 +1,6 @@
 # Rewritten by apps with machine state; never commit.
 config/fish/fish_variables
 config/hypr/openwhispr-binds.conf
+
+# Per-machine Hyprland overrides (see config/hypr/override.example.lua).
+config/hypr/override.lua

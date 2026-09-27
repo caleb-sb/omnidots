@@ -16,11 +16,13 @@ mainMod = "SUPER"
 ---- MONITORS ----
 ------------------
 
+-- Every output at its preferred mode, placed and scaled automatically. Modes
+-- for one machine go in override.lua (see override.example.lua).
 hl.monitor({
-    output   = "DP-2",
-    mode     = "3840x2160@144",
-    position = "0x0",
-    scale    = 1.5,
+    output   = "",
+    mode     = "preferred",
+    position = "auto",
+    scale    = "auto",
 })
 
 -------------------------------
@@ -32,9 +34,20 @@ hl.env("XCURSOR_THEME", "Bibata-Modern-Ice")
 hl.env("HYPRCURSOR_THEME", "Bibata-Modern-Ice")
 hl.env("HYPRCURSOR_SIZE", "24")
 hl.env("ELECTRON_OZONE_PLATFORM_HINT", "auto")
--- Set here, not in the shell, so Qt apps launched from Hyprland are themed.
+-- Set here, not in the shell, so apps launched from Hyprland get them too:
+-- Qt apps are themed, and everything finds the XDG dirs and the editor.
 hl.env("QT_QPA_PLATFORMTHEME", "qt6ct")
 hl.env("QT_STYLE_OVERRIDE", "kvantum")
+hl.env("EDITOR", editor)
+
+local home = os.getenv("HOME")
+hl.env("XDG_CONFIG_HOME", home .. "/.config")
+hl.env("XDG_DATA_HOME",   home .. "/.local/share")
+hl.env("XDG_CACHE_HOME",  home .. "/.cache")
+hl.env("XDG_STATE_HOME",  home .. "/.local/state")
+
+-- NVIDIA and multi-GPU variables, detected on this machine (see gpu.lua).
+require("gpu").apply()
 
 -----------------------
 ---- LOOK AND FEEL ----
@@ -132,9 +145,7 @@ hl.gesture({
 hl.on("hyprland.start", function()
     hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP")
     hl.exec_cmd("blueman-applet")
-    hl.exec_cmd("nm-applet --indicator")
     hl.exec_cmd("systemctl --user start hyprpolkitagent")
-    hl.exec_cmd("kanshi")
     hl.exec_cmd("qs -p ~/.config/qs-bar")
     hl.exec_cmd("hyprpaper")
     hl.exec_cmd("gsettings set org.gnome.desktop.interface icon-theme 'Tela-circle-purple-dark'")
@@ -152,3 +163,12 @@ end)
 
 require("keybindings")
 require("windowrules")
+
+-- This machine's overrides, if any, last so they win. Loaded with require so
+-- Hyprland reloads when the file changes.
+local config_dir = debug.getinfo(1, "S").source:match("^@(.*/)") or "./"
+local override = io.open(config_dir .. "override.lua", "r")
+if override then
+    override:close()
+    require("override")
+end

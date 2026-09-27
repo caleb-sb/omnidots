@@ -18,9 +18,8 @@ hl.window_rule({ match = { class = "^(discord)$" },     opacity = "0.90 0.90" })
 
 hl.window_rule({ match = { class = "^(pavucontrol)$" },          opacity = "0.80 0.70" })
 hl.window_rule({ match = { class = "^(blueman-manager)$" },      opacity = "0.80 0.70" })
-hl.window_rule({ match = { class = "^(nm-applet)$" },            opacity = "0.80 0.70" })
 hl.window_rule({ match = { class = "^(nm-connection-editor)$" }, opacity = "0.80 0.70" })
-hl.window_rule({ match = { class = "^(org.kde.polkit-kde-authentication-agent-1)$" }, opacity = "0.80 0.70" })
+hl.window_rule({ match = { class = "^(hyprpolkitagent)$" },      opacity = "0.80 0.70" })
 
 ---- Floating ----
 
@@ -29,9 +28,8 @@ hl.window_rule({ match = { class = "^(nwg-look)$" },              float = true }
 hl.window_rule({ match = { class = "^(org.kde.ark)$" },           float = true })
 hl.window_rule({ match = { class = "^(pavucontrol)$" },           float = true })
 hl.window_rule({ match = { class = "^(blueman-manager)$" },       float = true })
-hl.window_rule({ match = { class = "^(nm-applet)$" },             float = true })
 hl.window_rule({ match = { class = "^(nm-connection-editor)$" },  float = true })
-hl.window_rule({ match = { class = "^(org.kde.polkit-kde-authentication-agent-1)$" }, float = true })
+hl.window_rule({ match = { class = "^(hyprpolkitagent)$" },       float = true })
 
 ---- xwaylandvideobridge ----
 
