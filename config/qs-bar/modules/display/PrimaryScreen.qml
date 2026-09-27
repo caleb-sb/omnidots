@@ -4,8 +4,9 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-// The screen for the full bar and the notification popups: the primary output
-// Hyprland's monitors.lua names in $XDG_RUNTIME_DIR, else the first screen.
+// The screen for the full bar and the notification and volume/brightness
+// popups: the primary output Hyprland's monitors.lua names in
+// $XDG_RUNTIME_DIR, else the first screen.
 Singleton {
     id: root
 

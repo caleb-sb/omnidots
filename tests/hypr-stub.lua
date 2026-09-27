@@ -13,6 +13,8 @@
 -- scale = 1 } }) and WORKSPACES for hl.get_workspaces() (e.g. { { id = 1,
 -- monitor = { name = "DP-1" } } }). Event handlers land in HANDLERS[event]
 -- (a list), which emit(event, ...) calls, and bound actions in BINDS[keys].
+-- show_bind(keys) prints a bind's sorted flags and what it runs, e.g.
+-- `bind XF86AudioMute [locked] exec COMMAND` for an exec_cmd bind.
 -- Timers fire at once.
 --
 -- Usage: luajit hypr-stub.lua <config-dir> <lua-chunk>
@@ -33,7 +35,7 @@ end
 
 hl = stub()
 
-MONITORS, WORKSPACES, HANDLERS, BINDS = {}, {}, {}, {}
+MONITORS, WORKSPACES, HANDLERS, BINDS, BIND_OPTS = {}, {}, {}, {}, {}
 
 function hl.env(name, value)
     print("env " .. name .. "=" .. value)
@@ -82,8 +84,22 @@ function emit(event, ...)
     end
 end
 
-function hl.bind(keys, action)
+function hl.bind(keys, action, opts)
     BINDS[keys] = action
+    BIND_OPTS[keys] = opts or {}
+end
+
+function show_bind(keys)
+    local action = assert(BINDS[keys], "nothing bound to " .. keys)
+    local what = type(action) == "function" and "function"
+        or action.path == "exec_cmd" and "exec " .. action.args
+        or action.path
+    local flags = {}
+    for flag, on in pairs(BIND_OPTS[keys]) do
+        if on then flags[#flags + 1] = flag end
+    end
+    table.sort(flags)
+    print(string.format("bind %s [%s] %s", keys, table.concat(flags, ","), what))
 end
 
 function hl.timer(fn)

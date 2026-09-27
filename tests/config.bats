@@ -166,6 +166,54 @@ gpu_env() {
   [ "${lines[-1]}" = 'monitor DP-2 3840x2160@144 0x0 1.5' ]
 }
 
+# binds <keys...> — what each key runs, as show_bind prints it (see
+# hypr-stub.lua), with the whole Hyprland config loaded.
+binds() {
+  local dir="$BATS_TEST_TMPDIR/hypr" chunk key
+  mkdir -p "$dir"
+  cp "$CONFIG"/hypr/*.lua "$dir/"
+  rm -f "$dir/override.lua"
+  # shellcheck disable=SC2016 # Lua code
+  chunk='require("monitors").root = CONFIG_DIR; dofile(CONFIG_DIR .. "/hyprland.lua"); print("--")'
+  for key in "$@"; do
+    chunk+="; show_bind('$key')"
+  done
+  hypr_stub "$dir" "$chunk" | sed '1,/^--$/d'
+}
+
+@test "the volume and brightness keys call qs-bar, which changes the level and shows the popup" {
+  command -v luajit >/dev/null || skip "luajit is not installed"
+  local qs='exec qs -p ~/.config/qs-bar ipc call'
+  run -0 binds XF86AudioRaiseVolume XF86AudioLowerVolume XF86AudioMute \
+    XF86MonBrightnessUp XF86MonBrightnessDown
+  [ "$output" = "$(printf '%s\n' \
+    "bind XF86AudioRaiseVolume [locked,repeating] $qs volume up" \
+    "bind XF86AudioLowerVolume [locked,repeating] $qs volume down" \
+    "bind XF86AudioMute [locked] $qs volume mute" \
+    "bind XF86MonBrightnessUp [locked,repeating] $qs brightness up" \
+    "bind XF86MonBrightnessDown [locked,repeating] $qs brightness down")" ]
+}
+
+@test "the media keys stay on playerctl, and mic mute toggles the default source" {
+  command -v luajit >/dev/null || skip "luajit is not installed"
+  run -0 binds XF86AudioPlay XF86AudioPause XF86AudioNext XF86AudioPrev XF86AudioMicMute
+  [ "$output" = "$(printf '%s\n' \
+    'bind XF86AudioPlay [locked] exec playerctl play-pause' \
+    'bind XF86AudioPause [locked] exec playerctl play-pause' \
+    'bind XF86AudioNext [locked] exec playerctl next' \
+    'bind XF86AudioPrev [locked] exec playerctl previous' \
+    'bind XF86AudioMicMute [locked] exec wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle')" ]
+}
+
+@test "the old volume, brightness and global control scripts are gone, and nothing refers to them" {
+  run grep -rIlE 'volumecontrol|brightnesscontrol|globalcontrol' "$CONFIG" \
+    "$BATS_TEST_DIRNAME/../installer" "$BATS_TEST_DIRNAME/../README.md"
+  [ "$output" = "" ]
+  [ ! -e "$CONFIG/hypr/scripts/volumecontrol.sh" ]
+  [ ! -e "$CONFIG/hypr/scripts/brightnesscontrol.sh" ]
+  [ ! -e "$CONFIG/hypr/scripts/globalcontrol.sh" ]
+}
+
 @test "swaylock is gone, and so is kanshi's config: Hyprland handles the lid and monitors" {
   run grep -rIl swaylock "$CONFIG" "$BATS_TEST_DIRNAME/../installer" "$BATS_TEST_DIRNAME/../README.md"
   [ "$output" = "" ]

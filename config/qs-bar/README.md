@@ -10,6 +10,8 @@ Quickshell bar, built one module at a time. Tokyo Night (night).
     qs -p ~/.config/qs-bar ipc call clipboard toggle   # open/close clipboard history
     qs -p ~/.config/qs-bar ipc call display toggle     # toggle render scale 1.5x <-> 2.5x
     qs -p ~/.config/qs-bar ipc call calendar toggle    # open/close the calendar
+    qs -p ~/.config/qs-bar ipc call volume up          # also: down, mute (shows the popup)
+    qs -p ~/.config/qs-bar ipc call brightness up      # also: down (shows the popup)
 
 Needs the **Material Symbols Rounded** font (installed to ~/.local/share/fonts).
 
@@ -38,6 +40,21 @@ Needs the **Material Symbols Rounded** font (installed to ~/.local/share/fonts).
 - A red mic_off badge appears next to the icon while the input is muted.
 - The panel has a mute toggle, a volume slider and a device picker for both output and input. Picking a device makes it the PipeWire default.
 - "Sound settings" opens pavucontrol.
+
+## Volume and brightness popup
+
+Hyprland's volume and brightness keys call these IPC targets. Each one changes
+the level itself and then shows a popup at the bottom centre of the primary
+screen, with an icon, a level bar and the percentage. It fades out after
+1.5 s, and each further press restarts that.
+
+- `volume up | down | mute` works on the default output through PipeWire.
+  Up and down step 5%, stop at 100% and unmute.
+- `brightness up | down` steps the backlight 5% through brightnessctl, never
+  below 1%. On a machine without a backlight they do nothing and show no popup.
+- Only these targets show the popup. Volume changed anywhere else, such as in
+  pavucontrol or the audio panel, doesn't.
+- Mic mute (a plain `wpctl` bind) and the media keys (playerctl) have no popup.
 
 ## Network
 

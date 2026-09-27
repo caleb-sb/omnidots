@@ -128,9 +128,9 @@ reloads and whenever a monitor is plugged in or out, on every machine:
 
 - With an external monitor connected, the first by connector name (DP before
   HDMI-A, DP-2 before DP-10) is primary. It gets workspaces 1–10, the focus
-  and cursor, qs-bar's full bar and notification popups, and the XWayland
-  primary. To prefer another output, set `require("monitors").primary` in
-  `override.lua` (see `override.example.lua`).
+  and cursor, qs-bar's full bar, notification popups and volume/brightness
+  popup, and the XWayland primary. To prefer another output, set
+  `require("monitors").primary` in `override.lua` (see `override.example.lua`).
 - A laptop's built-in panel sits below the external monitor, and turns off
   while the lid is closed. Undocked, the panel is primary at its preferred
   mode with automatic position and scale.
