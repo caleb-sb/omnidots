@@ -143,7 +143,8 @@ Click the pill to open the **system panel**:
   opacity rules), sets XWayland `force_zero_scaling` so X11 games render at
   native resolution, and hides notification popups (critical ones still
   show). It is applied live with `hyprctl eval`, reapplied after a config
-  reload, and undone when switched off.
+  reload, and undone when switched off. On a machine with a laptop battery
+  it also switches the CPU to the performance profile.
 
 Press Super+X for the **power panel**. A power button slides out at the left
 of the pill while it's open; clicking it closes the panel.
@@ -153,8 +154,23 @@ of the pill while it's open; clicking it closes the panel.
   restart, **S** shut down (Esc closes). With the mouse, the last three
   turn red and need a second click within 3 s.
 - **Battery:** percentage and time left, when there is a battery.
+- **Battery saver:** only with a laptop battery. Switches the CPU to the
+  power-saver profile. It turns itself on at 20% while discharging and off
+  when you plug in. Toggling it by hand wins until the next plug or unplug.
 - **Sleep after:** suspend after 5, 15, 30 or 60 idle minutes, or never. Idle
   inhibitors (video players, games) hold it off.
 
-Game mode and the sleep timer are saved to `power.json` in the Quickshell
-state dir. IPC: `ipc call power toggle | gameMode`, `ipc call system toggle`.
+**Power profiles** go through Quickshell's PowerProfiles service, which
+tuned-ppd serves on laptops. The bar only touches the profile when there's
+a laptop battery: game mode → performance, else battery saver →
+power-saver, else balanced. Turning one of game mode and battery saver on
+turns the other off, and turning game mode off goes back to what battery
+saver says. The desktop's profile is left alone (the installer pins tuned
+to throughput-performance), and game mode there is only the visual changes.
+
+**Low battery:** a notification at 20% and a critical one at 10% while
+discharging, each once until you plug in again. Nothing suspends.
+
+Game mode, battery saver and the sleep timer are saved to `power.json` in
+the Quickshell state dir. IPC: `ipc call power toggle | gameMode`,
+`ipc call system toggle`.

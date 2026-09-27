@@ -3,3 +3,4 @@
 # through it.
 
 tuned-ppd
+libnotify             # notify-send, for qs-bar's low-battery warnings

@@ -8,9 +8,9 @@ See spec: qs-bar (Power, Battery warnings), User Stories 82–88.
 
 **Status:** ready-for-agent
 
-- [ ] The power module uses Quickshell's PowerProfiles service. The profile is derived as: game mode → performance, else battery saver → power-saver, else balanced. Enabling one disables the other. Turning game mode off restores the derived profile.
-- [ ] A battery-saver toggle appears in the power panel only when there's a laptop battery. With no battery, game mode keeps its visual effects but doesn't touch profiles.
-- [ ] Battery saver auto-enables at 20% when discharging and auto-disables on AC. A manual toggle overrides the automatic behaviour until the next AC transition. State survives restarts, like the existing settings.
-- [ ] The system stats module sends a normal notification at 20% and a critical one at 10% while discharging, once per threshold per discharge cycle. There is no auto-suspend.
-- [ ] The battery-notify script is deleted.
-- [ ] Smoke check: qs-bar loads without QML errors where a session is available.
+- [x] The power module uses Quickshell's PowerProfiles service. The profile is derived as: game mode → performance, else battery saver → power-saver, else balanced. Enabling one disables the other. Turning game mode off restores the derived profile.
+- [x] A battery-saver toggle appears in the power panel only when there's a laptop battery. With no battery, game mode keeps its visual effects but doesn't touch profiles.
+- [x] Battery saver auto-enables at 20% when discharging and auto-disables on AC. A manual toggle overrides the automatic behaviour until the next AC transition. State survives restarts, like the existing settings.
+- [x] The system stats module sends a normal notification at 20% and a critical one at 10% while discharging, once per threshold per discharge cycle. There is no auto-suspend.
+- [x] The battery-notify script is deleted.
+- [x] Smoke check: qs-bar loads without QML errors where a session is available.

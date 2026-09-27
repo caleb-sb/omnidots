@@ -214,6 +214,12 @@ binds() {
   [ ! -e "$CONFIG/hypr/scripts/globalcontrol.sh" ]
 }
 
+@test "the battery-notify script is gone and nothing refers to it: qs-bar sends the warnings" {
+  run grep -rIl batterynotify "$CONFIG" "$BATS_TEST_DIRNAME/../installer" "$BATS_TEST_DIRNAME/../README.md"
+  [ "$output" = "" ]
+  [ ! -e "$CONFIG/hypr/scripts/batterynotify.sh" ]
+}
+
 @test "swaylock is gone, and so is kanshi's config: Hyprland handles the lid and monitors" {
   run grep -rIl swaylock "$CONFIG" "$BATS_TEST_DIRNAME/../installer" "$BATS_TEST_DIRNAME/../README.md"
   [ "$output" = "" ]

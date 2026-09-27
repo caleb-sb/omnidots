@@ -4,10 +4,12 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import Quickshell.Services.UPower
+import "power.js" as Logic
 
 // Memory, root disk and battery readings for the device monitor, plus CPU,
 // GPU and temperatures, which only update while something is `watching`
-// (the system panel), since the bar itself doesn't show them.
+// (the system panel), since the bar itself doesn't show them. Also sends the
+// low-battery warnings.
 Singleton {
     id: root
 
@@ -44,6 +46,45 @@ Singleton {
     readonly property bool full: battery?.state === UPowerDeviceState.FullyCharged
     // Seconds; 0 while UPower is still estimating.
     readonly property real timeLeft: charging ? battery?.timeToFull ?? 0 : battery?.timeToEmpty ?? 0
+
+    // The battery reading the power module and the warnings act on,
+    // { onBattery, percent }, or null without a laptop battery. UPower's
+    // properties arrive one at a time at startup and flicker around plugging
+    // in, so a reading only counts once it has held for a second.
+    property var batteryReading: null
+    readonly property bool batteryReady: hasBattery && !!battery?.ready
+    onBatteryReadyChanged: settle.restart()
+    onBatteryPercentChanged: settle.restart()
+    Component.onCompleted: settle.start()
+    Connections {
+        target: UPower
+
+        function onOnBatteryChanged(): void {
+            settle.restart();
+        }
+    }
+    Timer {
+        id: settle
+
+        interval: 1000
+        onTriggered: root.batteryReading = root.batteryReady ? {
+            onBattery: UPower.onBattery,
+            percent: root.batteryPercent
+        } : null
+    }
+
+    // A normal notification at 20% and a critical one at 10% while
+    // discharging, each once per discharge (power.js). Nothing suspends.
+    // Not saved, so a restart below 20% on battery warns once more.
+    property var warnings: Logic.initialWarnings()
+    onBatteryReadingChanged: {
+        if (!batteryReading)
+            return;
+        const r = Logic.warn(warnings, batteryReading);
+        warnings = r.state;
+        if (r.warning)
+            Quickshell.execDetached(["notify-send", "-a", "Battery", "-u", r.warning.critical ? "critical" : "normal", "-i", r.warning.critical ? "battery-caution" : "battery-low", r.warning.critical ? "Battery critically low" : "Battery low", `${r.warning.percent}% left. Plug in soon.`]);
+    }
 
     // 7.3G / 296G style, one decimal below 10.
     function gb(bytes: real): string {

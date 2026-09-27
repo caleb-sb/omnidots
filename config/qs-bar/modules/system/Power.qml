@@ -5,19 +5,42 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
 import Quickshell.Hyprland
+import Quickshell.Services.UPower
 import qs.modules.notifications
+import "power.js" as Logic
 
-// Session actions, sleep-after-idle and game mode. Settings are kept in
-// the Quickshell state dir so they survive restarts.
+// Session actions, sleep-after-idle, game mode, battery saver and the CPU
+// power profile. Settings are kept in the Quickshell state dir so they
+// survive restarts.
 Singleton {
     id: root
 
     // Minutes of idle before suspending; 0 = never.
     property int sleepMinutes: 0
     readonly property list<int> sleepSteps: [0, 5, 15, 30, 60]
+    // Game mode, battery saver and the last battery reading (power.js).
+    property var st: Logic.initial()
     // Blur, animations, window transparency and notification popups off;
-    // XWayland apps render unscaled (force_zero_scaling).
-    property bool gameMode
+    // XWayland apps render unscaled (force_zero_scaling). With a laptop
+    // battery, also the performance profile.
+    readonly property bool gameMode: st.gameMode
+    // Power-saver profile. Only shown, and only ever on, with a laptop
+    // battery; it turns itself on at 20% while discharging and off on AC.
+    readonly property bool batterySaver: Logic.saverOn(st)
+    // The profile to hold: game mode → performance, else battery saver →
+    // power-saver, else balanced. "" without a laptop battery, where the
+    // profile is never touched.
+    readonly property string profile: loaded ? Logic.profile(st, SysStats.batteryReading !== null) : ""
+
+    function setGameMode(on: bool): void {
+        st = Logic.setGameMode(st, on);
+        saveTimer.restart();
+    }
+    // Turning saver on turns game mode off. Holds until the next AC transition.
+    function setBatterySaver(on: bool): void {
+        st = Logic.setSaver(st, on);
+        saveTimer.restart();
+    }
 
     function lock(): void {
         Quickshell.execDetached(["sh", "-c", "pidof hyprlock || hyprlock"]);
@@ -60,6 +83,37 @@ Singleton {
     onGameModeChanged: {
         if (loaded)
             applyGameMode();
+    }
+
+    onProfileChanged: applyProfile()
+    function applyProfile(): void {
+        if (!profile)
+            return;
+        let p = profile === "performance" ? PowerProfile.Performance : profile === "power-saver" ? PowerProfile.PowerSaver : PowerProfile.Balanced;
+        // Some machines have no performance profile.
+        if (p === PowerProfile.Performance && !PowerProfiles.hasPerformanceProfile)
+            p = PowerProfile.Balanced;
+        PowerProfiles.profile = p;
+    }
+    Connections {
+        target: PowerProfiles
+
+        function onHasPerformanceProfileChanged(): void {
+            root.applyProfile();
+        }
+    }
+
+    Connections {
+        target: SysStats
+
+        function onBatteryReadingChanged(): void {
+            root.takeReading();
+        }
+    }
+    function takeReading(): void {
+        if (!loaded || !SysStats.batteryReading)
+            return;
+        st = Logic.battery(st, SysStats.batteryReading);
         saveTimer.restart();
     }
     onSleepMinutesChanged: saveTimer.restart()
@@ -97,10 +151,9 @@ Singleton {
 
         interval: 500
         onTriggered: if (root.loaded)
-            storage.setText(JSON.stringify({
-                sleepMinutes: root.sleepMinutes,
-                gameMode: root.gameMode
-            }))
+            storage.setText(JSON.stringify(Object.assign({
+                sleepMinutes: root.sleepMinutes
+            }, root.st)))
     }
 
     FileView {
@@ -113,17 +166,20 @@ Singleton {
             try {
                 const data = JSON.parse(text());
                 root.sleepMinutes = data.sleepMinutes ?? 0;
-                root.gameMode = !!data.gameMode;
+                root.st = Logic.restore(data);
             } catch (e) {
                 console.warn("power: bad state file,", e);
             }
             root.loaded = true;
             if (root.gameMode)
                 root.applyGameMode();
+            root.takeReading();
         }
         onLoadFailed: err => {
-            if (err === FileViewError.FileNotFound)
+            if (err === FileViewError.FileNotFound) {
                 root.loaded = true;
+                root.takeReading();
+            }
         }
     }
 }

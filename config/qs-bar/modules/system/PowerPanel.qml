@@ -6,8 +6,8 @@ import Quickshell
 import qs.config
 import qs.components
 
-// Power panel (Super+X): session actions, battery (when there is one) and
-// the sleep timer. Keys run an action straight away, as wlogout did:
+// Power panel (Super+X): session actions, battery and battery saver (when
+// there is a laptop battery) and the sleep timer. Keys run an action straight away, as wlogout did:
 // L lock, E log out, R restart, S shut down. With the mouse, log out,
 // restart and shut down need a second click.
 Item {
@@ -163,6 +163,16 @@ Item {
                 fraction: SysStats.batteryPercent / 100
                 barColor: SysStats.batteryPercent <= 15 && !SysStats.charging ? Theme.c.red : Theme.c.blue
             }
+        }
+
+        // ── Battery saver ─────────────────────────────────────────
+        Tile {
+            visible: SysStats.hasBattery
+            icon: "battery_saver"
+            label: "Battery saver"
+            sublabel: Power.batterySaver ? "Power-saver profile" : Power.gameMode ? "Off while game mode is on" : "Turns on at 20% on battery"
+            checked: Power.batterySaver
+            onClicked: Power.setBatterySaver(!Power.batterySaver)
         }
 
         // ── Sleep after ───────────────────────────────────────────

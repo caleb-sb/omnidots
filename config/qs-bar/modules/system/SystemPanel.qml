@@ -133,7 +133,7 @@ Item {
             label: "Game mode"
             sublabel: "Effects, transparency and popups off"
             checked: Power.gameMode
-            onClicked: Power.gameMode = !Power.gameMode
+            onClicked: Power.setGameMode(!Power.gameMode)
         }
     }
 

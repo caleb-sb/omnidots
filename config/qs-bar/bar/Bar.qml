@@ -143,7 +143,7 @@ Variants {
                 popout.toggle("power", powerGroup, powerPanel);
             }
             function gameMode(): void {
-                Power.gameMode = !Power.gameMode;
+                Power.setGameMode(!Power.gameMode);
             }
         }
 
