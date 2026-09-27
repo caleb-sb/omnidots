@@ -494,7 +494,7 @@ pkg: akmod-nvidia" ]
   done
 }
 
-@test "every machine: starship, lazygit, OpenWhispr and Proton Mail from their latest upstream releases" {
+@test "every machine: starship, lazygit, OpenWhispr, Proton Mail and Proton Pass from their latest upstream releases" {
   local home="$BATS_TEST_TMPDIR/home"
   for fixture in desktop core-ultra-laptop hybrid-laptop old-intel-laptop; do
     plan_for "$fixture"
@@ -503,6 +503,7 @@ pkg: akmod-nvidia" ]
     assert_line "release: lazygit 0.65.1 https://github.com/jesseduffield/lazygit/releases/download/v0.65.1/lazygit_0.65.1_linux_x86_64.tar.gz -> $home/.local/bin/lazygit"
     assert_line "release: open-whispr 1.10.2 https://github.com/OpenWhispr/openwhispr/releases/download/v1.10.2/OpenWhispr-1.10.2-linux-x86_64.rpm"
     assert_line "release: proton-mail 1.14.0 https://proton.me/download/mail/linux/1.14.0/ProtonMail-desktop-beta.rpm"
+    assert_line "release: proton-pass 1.40.2 https://proton.me/download/pass/linux/proton-pass-1.40.2-1.x86_64.rpm"
     assert_line "pkg: tar"
     assert_line "pkg: gzip"
     refute_match '^repo: copr:atim/'

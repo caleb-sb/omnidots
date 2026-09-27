@@ -89,8 +89,11 @@ GDM stays installed but no longer starts; `./migrate.sh` removes it (see below).
 ## Update
 
 Tools that don't come from a dnf repo are installed from their upstream
-releases: starship and lazygit into `~/.local/bin`, and the OpenWhispr and
-Proton Mail rpms, and Android Studio when the Android module is installed.
+releases: starship and lazygit into `~/.local/bin`, the OpenWhispr, Proton
+Mail and Proton Pass rpms, and Android Studio when the Android module is
+installed. The Proton apps come from Proton's own release lists: the newest
+stable version that has reached everyone (not betas or partial rollouts),
+checked against Proton's published SHA-512 before it's installed.
 Fonts and themes are fetched too, not kept in git: the JetBrainsMono Nerd
 Font and Material Symbols Rounded at their latest versions into
 `~/.local/share/fonts`, and Tela circle icons, Bibata-Modern-Ice cursors

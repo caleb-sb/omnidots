@@ -63,13 +63,14 @@ refute_match() {
   fi
 }
 
-@test "fresh machine: plans starship, lazygit, OpenWhispr and Proton Mail from their latest releases" {
+@test "fresh machine: plans starship, lazygit, OpenWhispr, Proton Mail and Proton Pass from their latest releases" {
   update --dry-run
   [ "$status" -eq 0 ]
   assert_line "release: starship 1.26.0 https://github.com/starship/starship/releases/download/v1.26.0/starship-x86_64-unknown-linux-musl.tar.gz -> $HOME/.local/bin/starship"
   assert_line "release: lazygit 0.65.1 https://github.com/jesseduffield/lazygit/releases/download/v0.65.1/lazygit_0.65.1_linux_x86_64.tar.gz -> $HOME/.local/bin/lazygit"
   assert_line "release: open-whispr 1.10.2 https://github.com/OpenWhispr/openwhispr/releases/download/v1.10.2/OpenWhispr-1.10.2-linux-x86_64.rpm"
   assert_line "release: proton-mail 1.14.0 https://proton.me/download/mail/linux/1.14.0/ProtonMail-desktop-beta.rpm"
+  assert_line "release: proton-pass 1.40.2 https://proton.me/download/pass/linux/proton-pass-1.40.2-1.x86_64.rpm"
   [ -z "$(ls -A "$HOME")" ]
 }
 
@@ -113,6 +114,23 @@ installed_binary() {
   assert_line "release: open-whispr 1.10.2 https://github.com/OpenWhispr/openwhispr/releases/download/v1.10.2/OpenWhispr-1.10.2-linux-x86_64.rpm"
   assert_line "current: proton-mail 1.14.0"
   refute_match '^release: proton-mail '
+}
+
+@test "Proton releases still rolling out, and betas, wait until they reach everyone" {
+  # Proton Pass's newest Stable (1.41.1) has reached 5% of users, and 1.41.0
+  # is a Beta; 1.40.2 is the newest Stable everyone gets.
+  update --dry-run
+  [ "$status" -eq 0 ]
+  refute_match '^release: proton-pass 1\.41'
+  assert_line "release: proton-pass 1.40.2 https://proton.me/download/pass/linux/proton-pass-1.40.2-1.x86_64.rpm"
+}
+
+@test "skips a current Proton Pass" {
+  printf '%s\n' "proton-pass 1.40.2" >"$RPMDB"
+  update --dry-run
+  [ "$status" -eq 0 ]
+  assert_line "current: proton-pass 1.40.2"
+  refute_match '^release: proton-pass '
 }
 
 # theme_asset <dir under ~/.local/share> <name> <version> — an asset this

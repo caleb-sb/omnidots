@@ -155,13 +155,37 @@ install_release_binary() {
   rm -rf "$tmp"
 }
 
-# install_release_rpm <package> <version> <rpm-url> — install or upgrade the
-# package from a release rpm, unless that version is installed.
+# install_release_rpm <package> <version> <rpm-url> [sha512] — install or
+# upgrade the package from a release rpm, unless that version is installed.
+# With the checksum its publisher lists, the rpm is downloaded and checked
+# first, and nothing is installed if it doesn't match.
 install_release_rpm() {
-  local pkg="$1" version="$2" url="$3" installed
+  local pkg="$1" version="$2" url="$3" sha512="${4:-}" installed
   installed="$(rpm -q --qf '%{VERSION}' "$pkg")" || installed=
   is_current "$pkg" "$installed" "$version" && return
-  act release "$pkg $version $url" sudo dnf install -y "$url"
+  if [[ -z $sha512 ]]; then
+    act release "$pkg $version $url" sudo dnf install -y "$url"
+  else
+    act release "$pkg $version $url" install_verified_rpm "$url" "$sha512"
+  fi
+}
+
+# install_verified_rpm <rpm-url> <sha512> — download, check, then install.
+install_verified_rpm() {
+  local tmp file status=0
+  tmp="$(mktemp -d)"
+  file="$tmp/${1##*/}"
+  if ! curl -fsSL -o "$file" "$1"; then
+    status=1
+    log_error "Couldn't download $1"
+  elif ! sha512sum --quiet -c - <<<"$2  $file" >/dev/null 2>&1; then
+    status=1
+    log_error "$1 doesn't match its published SHA-512 checksum; not installing it."
+  else
+    sudo dnf install -y "$file" || status=$?
+  fi
+  rm -rf "$tmp"
+  return "$status"
 }
 
 # github_release <owner/repo> <name> <asset> — install or update <name> from
