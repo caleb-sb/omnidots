@@ -8,9 +8,9 @@ See spec: Theme, User Stories 58–61.
 
 **Status:** ready-for-agent
 
-- [ ] Tela circle icons (purple, plus the dark variant), Bibata-Modern-Ice cursors and the hyprcursor Bibata variant are fetched at pinned versions into the user icon directories.
-- [ ] Fausto-Korpsvart's Tokyonight-GTK-Theme is installed at a pinned commit using its libadwaita option, with the tweak closest to Tokyo Night Night. sassc and gtk-murrine-engine are in the package list.
-- [ ] The JetBrainsMono Nerd Font comes from the latest release, and the Material Symbols Rounded font is fetched. Both are refreshed by the update command, and the font cache is rebuilt.
-- [ ] The vendored icons, cursors, hyprcursors and Andromeda GTK theme directories are deleted from the repo, along with the old gtk, hyprcursor and fonts scripts.
-- [ ] bats asserts the dry-run plan lists each asset fetch, with network stubbed.
-- [ ] shellcheck passes.
+- [x] Tela circle icons (purple, plus the dark variant), Bibata-Modern-Ice cursors and the hyprcursor Bibata variant are fetched at pinned versions into the user icon directories.
+- [x] Fausto-Korpsvart's Tokyonight-GTK-Theme is installed at a pinned commit using its libadwaita option, with the tweak closest to Tokyo Night Night. sassc and gtk-murrine-engine are in the package list.
+- [x] The JetBrainsMono Nerd Font comes from the latest release, and the Material Symbols Rounded font is fetched. Both are refreshed by the update command, and the font cache is rebuilt.
+- [x] The vendored icons, cursors, hyprcursors and Andromeda GTK theme directories are deleted from the repo, along with the old gtk, hyprcursor and fonts scripts.
+- [x] bats asserts the dry-run plan lists each asset fetch, with network stubbed.
+- [x] shellcheck passes.

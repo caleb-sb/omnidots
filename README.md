@@ -63,7 +63,12 @@ manager and enter that password, or the NVIDIA module won't load.
 Tools that don't come from a dnf repo are installed from their upstream
 releases: starship and lazygit into `~/.local/bin`, and the OpenWhispr and
 Proton Mail rpms, and Android Studio when the Android module is installed.
-Refresh them with:
+Fonts and themes are fetched too, not kept in git: the JetBrainsMono Nerd
+Font and Material Symbols Rounded at their latest versions into
+`~/.local/share/fonts`, and Tela circle icons, Bibata-Modern-Ice cursors
+(XCursor and hyprcursor) and the Tokyonight GTK theme at the versions pinned
+in `installer/modules/35-theme-assets.sh`, into `~/.local/share/icons` and
+`~/.local/share/themes`. Refresh them all with:
 
 ```sh
 ./update.sh            # install anything with a newer release
@@ -72,9 +77,9 @@ Refresh them with:
 
 It skips anything already at its latest release, so it's safe to run often.
 It only refreshes Android Studio when `/opt/android-studio` exists, and never
-installs it. The installer runs the same steps
-(`installer/modules/80-releases.sh` and `85-android.sh`) for the first
-install.
+installs it. A theme is replaced only when its pin changes. The installer
+runs the same steps (`installer/modules/35-theme-assets.sh`,
+`80-releases.sh` and `85-android.sh`) for the first install.
 
 Layout:
 

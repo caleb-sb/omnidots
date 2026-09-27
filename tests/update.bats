@@ -115,6 +115,72 @@ installed_binary() {
   refute_match '^release: proton-mail '
 }
 
+# theme_asset <dir under ~/.local/share> <name> <version> — an asset this
+# installed there at that version.
+theme_asset() {
+  mkdir -p "$HOME/.local/share/$1"
+  printf '%s\n' "$3" >"$HOME/.local/share/$1/.omnidots-$2"
+}
+
+@test "fresh machine: fetches the pinned themes and the latest fonts, then rebuilds the font cache" {
+  local share="$HOME/.local/share"
+  update --dry-run
+  [ "$status" -eq 0 ]
+  assert_line "release: tela-circle-icons 2026-07-07 https://github.com/vinceliuice/Tela-circle-icon-theme/archive/refs/tags/2026-07-07.tar.gz -> $share/icons/Tela-circle-purple"
+  assert_line "release: bibata-cursors 2.0.7 https://github.com/ful1e5/Bibata_Cursor/releases/download/v2.0.7/Bibata-Modern-Ice.tar.xz -> $share/icons/Bibata-Modern-Ice"
+  assert_line "release: bibata-hyprcursors 1.1 https://github.com/LOSEARDES77/Bibata-Cursor-hyprcursor/releases/download/v1.1/hypr_Bibata-Modern-Ice.tar.gz -> $share/icons/Bibata-Modern-Ice"
+  assert_line "release: tokyonight-gtk 6c340e058e84c1975a038a8e5d1e384477225dc0 https://github.com/Fausto-Korpsvart/Tokyonight-GTK-Theme/archive/6c340e058e84c1975a038a8e5d1e384477225dc0.tar.gz -> $share/themes/Tokyonight-Dark"
+  assert_line "release: jetbrains-mono-nerd-font 3.5.1 https://github.com/ryanoasis/nerd-fonts/releases/download/v3.5.1/JetBrainsMono.tar.xz -> $share/fonts/JetBrainsMonoNerdFont"
+  assert_line "release: material-symbols-rounded bd8cb85bd4bad964fe6918f79665bb40c3a8efef https://raw.githubusercontent.com/google/material-design-icons/bd8cb85bd4bad964fe6918f79665bb40c3a8efef/variablefont/MaterialSymbolsRounded%5BFILL,GRAD,opsz,wght%5D.ttf -> $share/fonts/MaterialSymbolsRounded"
+  assert_line "run: fc-cache -f"
+}
+
+@test "skips themes already at their pinned versions" {
+  theme_asset icons/Tela-circle-purple tela-circle-icons 2026-07-07
+  theme_asset icons/Bibata-Modern-Ice bibata-cursors 2.0.7
+  theme_asset icons/Bibata-Modern-Ice bibata-hyprcursors 1.1
+  theme_asset themes/Tokyonight-Dark tokyonight-gtk 6c340e058e84c1975a038a8e5d1e384477225dc0
+  update --dry-run
+  [ "$status" -eq 0 ]
+  assert_line "current: tela-circle-icons 2026-07-07"
+  assert_line "current: bibata-cursors 2.0.7"
+  assert_line "current: bibata-hyprcursors 1.1"
+  assert_line "current: tokyonight-gtk 6c340e058e84c1975a038a8e5d1e384477225dc0"
+  refute_match '^release: (tela|bibata|tokyonight)'
+}
+
+@test "replaces a theme installed at an older pin" {
+  theme_asset themes/Tokyonight-Dark tokyonight-gtk 9d67b24f1d326816a645ba47933f9986a1ff8a23
+  update --dry-run
+  [ "$status" -eq 0 ]
+  assert_line "release: tokyonight-gtk 6c340e058e84c1975a038a8e5d1e384477225dc0 https://github.com/Fausto-Korpsvart/Tokyonight-GTK-Theme/archive/6c340e058e84c1975a038a8e5d1e384477225dc0.tar.gz -> $HOME/.local/share/themes/Tokyonight-Dark"
+}
+
+@test "refreshes an older Nerd Font, skips a current Material Symbols, and rebuilds the font cache" {
+  theme_asset fonts/JetBrainsMonoNerdFont jetbrains-mono-nerd-font 3.2.1
+  theme_asset fonts/MaterialSymbolsRounded material-symbols-rounded bd8cb85bd4bad964fe6918f79665bb40c3a8efef
+  update --dry-run
+  [ "$status" -eq 0 ]
+  assert_line "release: jetbrains-mono-nerd-font 3.5.1 https://github.com/ryanoasis/nerd-fonts/releases/download/v3.5.1/JetBrainsMono.tar.xz -> $HOME/.local/share/fonts/JetBrainsMonoNerdFont"
+  assert_line "current: material-symbols-rounded bd8cb85bd4bad964fe6918f79665bb40c3a8efef"
+  assert_line "run: fc-cache -f"
+}
+
+@test "refreshes Material Symbols changed since, and leaves the font cache alone when no font changed" {
+  theme_asset fonts/JetBrainsMonoNerdFont jetbrains-mono-nerd-font 3.5.1
+  theme_asset fonts/MaterialSymbolsRounded material-symbols-rounded 27e9ef1dbeedc13d682fece4a58e1eda4cb0961a
+  update --dry-run
+  [ "$status" -eq 0 ]
+  assert_line "release: material-symbols-rounded bd8cb85bd4bad964fe6918f79665bb40c3a8efef https://raw.githubusercontent.com/google/material-design-icons/bd8cb85bd4bad964fe6918f79665bb40c3a8efef/variablefont/MaterialSymbolsRounded%5BFILL,GRAD,opsz,wght%5D.ttf -> $HOME/.local/share/fonts/MaterialSymbolsRounded"
+
+  theme_asset fonts/MaterialSymbolsRounded material-symbols-rounded bd8cb85bd4bad964fe6918f79665bb40c3a8efef
+  update --dry-run
+  [ "$status" -eq 0 ]
+  assert_line "current: jetbrains-mono-nerd-font 3.5.1"
+  assert_line "current: material-symbols-rounded bd8cb85bd4bad964fe6918f79665bb40c3a8efef"
+  refute_match 'fc-cache'
+}
+
 @test "without Android Studio in /opt: never installs it" {
   update --dry-run
   [ "$status" -eq 0 ]

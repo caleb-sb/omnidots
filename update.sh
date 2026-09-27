@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 #
 # Refreshes everything that doesn't come from a dnf repo, skipping anything
-# already at its latest release. Android Studio is refreshed only when it's
-# installed in /opt; this never installs it.
+# already at its latest release or, for themes, its pinned version. Android
+# Studio is refreshed only when it's installed in /opt; this never installs it.
 #
 # Usage: ./update.sh [--dry-run]
 #   --dry-run  print the plan to stdout, one action per line, and change nothing
@@ -15,6 +15,7 @@ source installer/lib.sh
 
 # The installer runs these modules too, for the first install.
 MODULES=(
+  installer/modules/35-theme-assets.sh
   installer/modules/80-releases.sh
   installer/modules/85-android.sh
 )

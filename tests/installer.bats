@@ -123,7 +123,7 @@ repo: flathub" ]
   mkdir -p "$stubs"
   for cmd in sudo dnf rpm mokutil kmodgenca akmods modinfo systemctl tuned-adm \
     authselect fprintd-list fprintd-enroll curl gpg flatpak usermod rustup-init \
-    pnpm bun claude tar; do
+    pnpm bun claude tar fc-cache; do
     printf '#!/bin/sh\necho "%s $*" >>"%s"\n' "$cmd" "$BATS_TEST_TMPDIR/calls" >"$stubs/$cmd"
     chmod +x "$stubs/$cmd"
   done
@@ -549,4 +549,35 @@ pkg: akmod-nvidia" ]
   [ "$status" -eq 1 ]
   plan_for desktop WITH_ANDROID=yes
   [ "$status" -eq 1 ]
+}
+
+@test "every machine: Tela circle icons, Bibata cursors and the Tokyonight GTK theme at pinned versions" {
+  local share="$BATS_TEST_TMPDIR/home/.local/share"
+  for fixture in desktop core-ultra-laptop hybrid-laptop old-intel-laptop; do
+    plan_for "$fixture"
+    [ "$status" -eq 0 ]
+    assert_line "release: tela-circle-icons 2026-07-07 https://github.com/vinceliuice/Tela-circle-icon-theme/archive/refs/tags/2026-07-07.tar.gz -> $share/icons/Tela-circle-purple"
+    assert_line "release: bibata-cursors 2.0.7 https://github.com/ful1e5/Bibata_Cursor/releases/download/v2.0.7/Bibata-Modern-Ice.tar.xz -> $share/icons/Bibata-Modern-Ice"
+    assert_line "release: bibata-hyprcursors 1.1 https://github.com/LOSEARDES77/Bibata-Cursor-hyprcursor/releases/download/v1.1/hypr_Bibata-Modern-Ice.tar.gz -> $share/icons/Bibata-Modern-Ice"
+    assert_line "release: tokyonight-gtk 6c340e058e84c1975a038a8e5d1e384477225dc0 https://github.com/Fausto-Korpsvart/Tokyonight-GTK-Theme/archive/6c340e058e84c1975a038a8e5d1e384477225dc0.tar.gz -> $share/themes/Tokyonight-Dark"
+  done
+}
+
+@test "every machine: the latest JetBrainsMono Nerd Font and Material Symbols Rounded, then the font cache is rebuilt" {
+  local fonts="$BATS_TEST_TMPDIR/home/.local/share/fonts"
+  for fixture in desktop core-ultra-laptop hybrid-laptop old-intel-laptop; do
+    plan_for "$fixture"
+    [ "$status" -eq 0 ]
+    assert_line "release: jetbrains-mono-nerd-font 3.5.1 https://github.com/ryanoasis/nerd-fonts/releases/download/v3.5.1/JetBrainsMono.tar.xz -> $fonts/JetBrainsMonoNerdFont"
+    assert_line "release: material-symbols-rounded bd8cb85bd4bad964fe6918f79665bb40c3a8efef https://raw.githubusercontent.com/google/material-design-icons/bd8cb85bd4bad964fe6918f79665bb40c3a8efef/variablefont/MaterialSymbolsRounded%5BFILL,GRAD,opsz,wght%5D.ttf -> $fonts/MaterialSymbolsRounded"
+    assert_line "run: fc-cache -f"
+  done
+}
+
+@test "every machine: what building and unpacking the theme assets needs" {
+  plan_for desktop
+  [ "$status" -eq 0 ]
+  assert_line "pkg: sassc"
+  assert_line "pkg: gtk-murrine-engine"
+  assert_line "pkg: xz"
 }

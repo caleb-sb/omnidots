@@ -44,6 +44,10 @@ flatpak               # Obsidian, Spotify and Cura come from Flathub
 gvfs
 gvfs-mtp
 
+# Tokyonight GTK theme (35-theme-assets.sh builds it)
+sassc
+gtk-murrine-engine    # GTK2 engine it uses
+
 # File manager
 Thunar
 thunar-volman
@@ -70,6 +74,7 @@ parallel
 pciutils              # lspci, for hardware detection
 ripgrep
 tar                   # unpacks the starship and lazygit releases
+xz                    # for tar, on the Bibata cursors and Nerd Font
 unzip
 usbutils
 wget2
