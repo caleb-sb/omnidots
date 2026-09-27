@@ -1,0 +1,8 @@
+# Docker Engine from Docker's own repo (added by 10-repos.sh), rootful.
+# Podman is left out on purpose.
+
+docker-ce
+docker-ce-cli
+containerd.io
+docker-buildx-plugin
+docker-compose-plugin

@@ -5,9 +5,9 @@
 #
 # Dry-run: with DRY_RUN=1 nothing is executed. Every action prints one plan
 # line to stdout instead, as `<kind>: <detail>` (flag, conf, repo, pkg, swap,
-# backup, link, run, wait, gpu-order, and ask for a command the real run
-# offers and the user can skip). The tests assert on these lines, so keep the
-# format stable.
+# backup, link, run, wait, gpu-order, flatpak for a Flathub app ID, and ask
+# for a command the real run offers and the user can skip). The tests assert
+# on these lines, so keep the format stable.
 # Logging goes to stderr so it never mixes with the plan.
 
 OMNIDOTS_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -59,6 +59,19 @@ install_packages() {
     return
   fi
   sudo dnf install -y "$@"
+}
+
+# install_flatpaks <app-id...> — install apps from the Flathub remote, which
+# 60-flatpaks.sh adds, system-wide in one transaction. Installed apps are
+# skipped.
+install_flatpaks() {
+  (($#)) || return 0
+  if is_dry_run; then
+    local app
+    for app in "$@"; do plan flatpak "$app"; done
+    return
+  fi
+  sudo flatpak install -y --noninteractive flathub "$@"
 }
 
 # package_list <name> — print the packages in packages/<name>.txt, one per

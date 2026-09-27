@@ -1,8 +1,8 @@
 # Packages every machine gets. One per line; `#` starts a comment.
 #
 # GPU drivers and the Bluetooth, backlight and battery packages live in their
-# own capability lists. starship and lazygit come from GitHub releases, and
-# Brave, Chrome and Steam need repos set up by their own modules.
+# own capability lists. starship and lazygit come from GitHub releases. Brave,
+# Chrome and Proton VPN come from the vendor repos 10-repos.sh adds.
 
 # Hyprland session
 hyprland
@@ -40,6 +40,7 @@ qt6-qtsvg
 yad                   # dialogs from Thunar custom actions
 xdg-user-dirs
 xdg-utils
+flatpak               # Obsidian, Spotify and Cura come from Flathub
 gvfs
 gvfs-mtp
 
@@ -53,6 +54,7 @@ file-roller
 
 # Audio
 pamixer
+playerctl             # media keys
 pavucontrol
 pipewire-alsa
 pipewire-utils
@@ -70,12 +72,16 @@ unzip
 usbutils
 wget2
 
-# Development
+# Development (70-dev-tools.sh installs the rest)
 golang
+rustup                # rustup-init; 70-dev-tools.sh runs it
 python3
 
 # Apps
+brave-browser
+google-chrome-stable
 inkscape
 meld
 obs-studio
+proton-vpn-gnome-desktop  # just the GTK app, CLI, daemon and NetworkManager plugin
 vlc

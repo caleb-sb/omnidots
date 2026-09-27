@@ -21,6 +21,7 @@ plan_for() {
     -u XDG_DATA_HOME HOME="$BATS_TEST_TMPDIR/home" \
     OMNIDOTS_SYSFS_ROOT="$FIXTURES/$fixture/sysfs" \
     OMNIDOTS_LSPCI_FILE="$FIXTURES/$fixture/lspci.txt" \
+    OMNIDOTS_OS_RELEASE="$FIXTURES/os-release" \
     "$@" "$REPO_ROOT/install.sh" --dry-run
 }
 
@@ -67,7 +68,12 @@ refute_line() {
   [ "$repos" = "repo: rpmfusion-free
 repo: rpmfusion-nonfree
 repo: copr:lionheartp/Hyprland
-repo: copr:errornointernet/quickshell" ]
+repo: copr:errornointernet/quickshell
+repo: brave-browser
+repo: google-chrome
+repo: docker-ce
+repo: protonvpn https://repo.protonvpn.com/fedora-44-stable/protonvpn-stable-release/protonvpn-stable-release-1.0.4-1.noarch.rpm
+repo: flathub" ]
 }
 
 @test "desktop: installs the core packages and none of the dropped ones" {
@@ -106,7 +112,8 @@ repo: copr:errornointernet/quickshell" ]
   local stubs="$BATS_TEST_TMPDIR/bin"
   mkdir -p "$stubs"
   for cmd in sudo dnf rpm mokutil kmodgenca akmods modinfo systemctl tuned-adm \
-    authselect fprintd-list fprintd-enroll; do
+    authselect fprintd-list fprintd-enroll curl gpg flatpak usermod rustup-init \
+    pnpm bun claude; do
     printf '#!/bin/sh\necho "%s $*" >>"%s"\n' "$cmd" "$BATS_TEST_TMPDIR/calls" >"$stubs/$cmd"
     chmod +x "$stubs/$cmd"
   done
@@ -398,4 +405,70 @@ pkg: akmod-nvidia" ]
   plan_for core-ultra-laptop
   [ "$status" -eq 0 ]
   [ "$(tail -n 1 <<<"$output")" = "ask: fprintd-enroll" ]
+}
+
+@test "every machine: Brave, Chrome, Docker CE and Proton VPN repos for the running Fedora" {
+  for fixture in desktop core-ultra-laptop hybrid-laptop old-intel-laptop; do
+    plan_for "$fixture"
+    [ "$status" -eq 0 ]
+    assert_line "pkg: dnf5-plugins"
+    assert_line "repo: brave-browser"
+    assert_line "pkg: fedora-workstation-repositories"
+    assert_line "repo: google-chrome"
+    assert_line "repo: docker-ce"
+    assert_line "repo: protonvpn https://repo.protonvpn.com/fedora-44-stable/protonvpn-stable-release/protonvpn-stable-release-1.0.4-1.noarch.rpm"
+  done
+}
+
+@test "every machine: everyday apps, playerctl, rofi and Proton VPN, no wofi" {
+  for fixture in desktop core-ultra-laptop hybrid-laptop old-intel-laptop; do
+    plan_for "$fixture"
+    [ "$status" -eq 0 ]
+    for pkg in brave-browser google-chrome-stable inkscape meld vlc obs-studio \
+      playerctl rofi proton-vpn-gnome-desktop; do
+      assert_line "pkg: $pkg"
+    done
+    refute_line "pkg: wofi"
+    refute_match 'snap|postman'
+  done
+}
+
+@test "every machine: rootful Docker CE with its plugins and me in the docker group, no Podman" {
+  for fixture in desktop core-ultra-laptop hybrid-laptop old-intel-laptop; do
+    plan_for "$fixture"
+    [ "$status" -eq 0 ]
+    for pkg in docker-ce docker-ce-cli containerd.io docker-buildx-plugin \
+      docker-compose-plugin; do
+      assert_line "pkg: $pkg"
+    done
+    assert_line "run: sudo systemctl enable --now docker"
+    assert_line "run: sudo usermod -aG docker $(id -un)"
+    refute_match '^pkg: podman'
+  done
+}
+
+@test "every machine: Flathub with Obsidian, Spotify and Cura" {
+  for fixture in desktop core-ultra-laptop hybrid-laptop old-intel-laptop; do
+    plan_for "$fixture"
+    [ "$status" -eq 0 ]
+    assert_line "pkg: flatpak"
+    assert_line "repo: flathub"
+    assert_line "flatpak: md.obsidian.Obsidian"
+    assert_line "flatpak: com.spotify.Client"
+    assert_line "flatpak: com.ultimaker.cura"
+  done
+}
+
+@test "every machine: Go, rustup, pnpm with Node, bun and Claude Code" {
+  for fixture in desktop core-ultra-laptop hybrid-laptop old-intel-laptop; do
+    plan_for "$fixture"
+    [ "$status" -eq 0 ]
+    assert_line "pkg: golang"
+    assert_line "pkg: rustup"
+    assert_line "run: rustup-init -y --no-modify-path"
+    assert_line "run: curl -fsSL https://get.pnpm.io/install.sh | sh -"
+    assert_line "run: pnpm runtime set node lts -g"
+    assert_line "run: curl -fsSL https://bun.sh/install | bash"
+    assert_line "run: curl -fsSL https://claude.ai/install.sh | bash"
+  done
 }

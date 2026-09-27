@@ -43,7 +43,8 @@ manager and enter that password, or the NVIDIA module won't load.
 Layout:
 
 - `install.sh`: entry point
-- `installer/lib.sh`: logging, batched package install, flag check, dry-run
+- `installer/lib.sh`: logging, batched package and flatpak install, flag
+  check, dry-run
 - `installer/detect.sh`: capability detection
 - `installer/modules/NN-*.sh`: one job each, run in order
 - `installer/packages/*.txt`: package lists, one package per line, `#` comments
