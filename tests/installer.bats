@@ -17,7 +17,7 @@ plan_for() {
   mkdir -p "$BATS_TEST_TMPDIR/home"
   run --separate-stderr env -u HAS_NVIDIA -u HAS_AMD_GPU -u HAS_INTEL_GPU \
     -u HAS_LEGACY_INTEL_GPU -u HAS_HYBRID_GPU -u HAS_BATTERY -u HAS_BACKLIGHT \
-    -u HAS_BLUETOOTH -u XDG_CONFIG_HOME \
+    -u HAS_BLUETOOTH -u HAS_FPRINT -u XDG_CONFIG_HOME \
     -u XDG_DATA_HOME HOME="$BATS_TEST_TMPDIR/home" \
     OMNIDOTS_SYSFS_ROOT="$FIXTURES/$fixture/sysfs" \
     OMNIDOTS_LSPCI_FILE="$FIXTURES/$fixture/lspci.txt" \
@@ -105,11 +105,12 @@ repo: copr:errornointernet/quickshell" ]
 @test "dry-run executes nothing" {
   local stubs="$BATS_TEST_TMPDIR/bin"
   mkdir -p "$stubs"
-  for cmd in sudo dnf rpm mokutil kmodgenca akmods modinfo systemctl tuned-adm; do
+  for cmd in sudo dnf rpm mokutil kmodgenca akmods modinfo systemctl tuned-adm \
+    authselect fprintd-list fprintd-enroll; do
     printf '#!/bin/sh\necho "%s $*" >>"%s"\n' "$cmd" "$BATS_TEST_TMPDIR/calls" >"$stubs/$cmd"
     chmod +x "$stubs/$cmd"
   done
-  for fixture in desktop hybrid-laptop; do
+  for fixture in desktop hybrid-laptop core-ultra-laptop; do
     plan_for "$fixture" PATH="$stubs:$PATH"
     [ "$status" -eq 0 ]
   done
@@ -348,4 +349,53 @@ pkg: akmod-nvidia" ]
   [ "$status" -eq 0 ]
   assert_line "pkg: tuned-ppd"
   refute_match 'tuned-adm profile|throughput-performance'
+}
+
+@test "core ultra laptop: detects the Goodix fingerprint reader" {
+  plan_for core-ultra-laptop
+  [ "$status" -eq 0 ]
+  assert_line "flag: HAS_FPRINT=1"
+}
+
+@test "desktop, hybrid and old Intel: no fingerprint reader" {
+  for fixture in desktop hybrid-laptop old-intel-laptop; do
+    plan_for "$fixture"
+    [ "$status" -eq 0 ]
+    assert_line "flag: HAS_FPRINT=0"
+  done
+}
+
+@test "core ultra laptop: fprintd, its PAM module and authselect's fingerprint feature" {
+  plan_for core-ultra-laptop
+  [ "$status" -eq 0 ]
+  assert_line "pkg: fprintd"
+  assert_line "pkg: fprintd-pam"
+  assert_line "run: sudo authselect enable-feature with-fingerprint"
+}
+
+@test "desktop, hybrid and old Intel: no fingerprint packages or authselect change" {
+  for fixture in desktop hybrid-laptop old-intel-laptop; do
+    plan_for "$fixture"
+    [ "$status" -eq 0 ]
+    refute_match 'fprintd|authselect'
+  done
+}
+
+@test "HAS_FPRINT overrides add or drop the fingerprint steps" {
+  plan_for desktop HAS_FPRINT=1
+  [ "$status" -eq 0 ]
+  assert_line "flag: HAS_FPRINT=1"
+  assert_line "pkg: fprintd"
+  assert_line "run: sudo authselect enable-feature with-fingerprint"
+
+  plan_for core-ultra-laptop HAS_FPRINT=0
+  [ "$status" -eq 0 ]
+  assert_line "flag: HAS_FPRINT=0"
+  refute_match 'fprintd|authselect'
+}
+
+@test "core ultra laptop: offers fingerprint enrollment as the last step" {
+  plan_for core-ultra-laptop
+  [ "$status" -eq 0 ]
+  [ "$(tail -n 1 <<<"$output")" = "ask: fprintd-enroll" ]
 }

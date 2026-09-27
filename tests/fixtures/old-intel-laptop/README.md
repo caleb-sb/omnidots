@@ -12,3 +12,7 @@ variable, as on a legacy-BIOS install.
   host bridge, the GPU and the Wi-Fi card. Under `class/` it has a battery
   (`BAT0`), an AC adapter, the `intel_backlight` backlight and a Bluetooth
   adapter (placeholder files stand in for device directories).
+- `sysfs/bus/usb/devices` has the root hubs (1d6b), a Chicony camera (04f2,
+  one off Elan's 04f3) and the Wireless 7260's Bluetooth (8087:07dc), so no
+  fingerprint reader. Only `idVendor` and `idProduct` are mirrored; IDs were
+  checked against the USB ID database (`/usr/share/hwdata/usb.ids`).

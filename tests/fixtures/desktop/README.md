@@ -11,3 +11,7 @@ devices in `lspci.txt` are the NVMe drive and Wi-Fi card, not GPUs.
 - `class/power_supply` is synthetic: the desktop has no power supplies, but
   a wireless mouse's battery (type Battery, scope Device) and a USB-C port
   (type USB) are added to prove neither counts as a battery.
+- `sysfs/bus/usb/devices` is synthetic: the root hubs (1d6b), a Logitech
+  Unifying receiver (046d) and the Intel AX210 Bluetooth adapter (8087), so no
+  fingerprint reader. Only `idVendor` and `idProduct` are mirrored; IDs were
+  checked against the USB ID database (`/usr/share/hwdata/usb.ids`).

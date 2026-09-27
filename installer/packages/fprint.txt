@@ -1,0 +1,6 @@
+# Machines with a fingerprint reader (HAS_FPRINT=1). fprintd drives the reader
+# through libfprint; fprintd-pam is the PAM module authselect's
+# with-fingerprint feature turns on.
+
+fprintd
+fprintd-pam

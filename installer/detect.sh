@@ -6,7 +6,8 @@
 # Inputs, overridable so tests can feed in recorded machines:
 #   OMNIDOTS_LSPCI_FILE  recorded `lspci -n` output (default: run `lspci -n`)
 #   OMNIDOTS_SYSFS_ROOT  sysfs root (default: /sys), read for the battery,
-#                        backlight, Bluetooth and Secure Boot state
+#                        backlight, Bluetooth, USB devices and Secure Boot
+#                        state
 #
 # A HAS_* variable already set in the environment (to 0 or 1) overrides
 # detection.
@@ -18,10 +19,23 @@ declare -A GPU_VENDOR_IDS=(
   [HAS_INTEL_GPU]=8086
 )
 
+# USB vendor IDs of the fingerprint reader makers libfprint supports. The
+# vendor alone decides: Synaptics and Elan also make touchpads and
+# touchscreens, but laptop touchpads sit on I2C or PS/2, not USB. A USB Elan
+# touchscreen would still count; HAS_FPRINT=0 overrides that.
+FPRINT_USB_VENDOR_IDS=(
+  27c6 # Goodix
+  06cb # Synaptics
+  04f3 # Elan
+  138a # Validity
+  1c7a # Egis (LighTuning)
+  2808 # FocalTech
+)
+
 # Display order for the confirmation prompt and the plan.
 # shellcheck disable=SC2034 # read by install.sh
 CAPABILITY_FLAGS=(HAS_NVIDIA HAS_AMD_GPU HAS_INTEL_GPU HAS_LEGACY_INTEL_GPU
-  HAS_HYBRID_GPU HAS_BATTERY HAS_BACKLIGHT HAS_BLUETOOTH)
+  HAS_HYBRID_GPU HAS_BATTERY HAS_BACKLIGHT HAS_BLUETOOTH HAS_FPRINT)
 
 # pci_devices — `lspci -n` style lines: "<slot> <class>: <vendor>:<device>".
 # Falls back to sysfs when lspci isn't installed (Minimal lacks pciutils).
@@ -113,6 +127,21 @@ has_system_battery() {
   return 1
 }
 
+# has_fprint_reader — true when a USB device comes from a fingerprint reader
+# vendor. Interfaces (e.g. 1-3:1.0) and anything else without idVendor are
+# skipped.
+has_fprint_reader() {
+  local id vendor known
+  for id in "${OMNIDOTS_SYSFS_ROOT:-/sys}"/bus/usb/devices/*/idVendor; do
+    [[ -r $id ]] || continue
+    read -r vendor <"$id"
+    for known in "${FPRINT_USB_VENDOR_IDS[@]}"; do
+      [[ $vendor == "$known" ]] && return 0
+    done
+  done
+  return 1
+}
+
 # set_flag <HAS_*> <0|1> — export the detected value unless overridden.
 set_flag() {
   local name="$1" detected="$2"
@@ -126,7 +155,7 @@ set_flag() {
 
 detect_capabilities() {
   local gpus vendors flag vendor device legacy=0 hybrid=0
-  local battery=0 backlight=0 bluetooth=0
+  local battery=0 backlight=0 bluetooth=0 fprint=0
   gpus="$(gpu_devices)"
   vendors="$(cut -d' ' -f2 <<<"$gpus")"
   for flag in "${!GPU_VENDOR_IDS[@]}"; do
@@ -162,4 +191,7 @@ detect_capabilities() {
   set_flag HAS_BATTERY "$battery"
   set_flag HAS_BACKLIGHT "$backlight"
   set_flag HAS_BLUETOOTH "$bluetooth"
+
+  if has_fprint_reader; then fprint=1; fi
+  set_flag HAS_FPRINT "$fprint"
 }

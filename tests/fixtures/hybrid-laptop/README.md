@@ -15,3 +15,8 @@ is on.
   `class/` it has a battery (`BAT0`), an AC adapter, the `intel_backlight`
   backlight and a Bluetooth adapter (placeholder files stand in for device
   directories).
+- `sysfs/bus/usb/devices` has the root hubs (1d6b), a Chicony camera (04f2,
+  one off Elan's 04f3) and the Intel AX211 Bluetooth adapter (8087), so no
+  fingerprint reader. `bus/hid/devices` has an Elan I2C touchpad
+  (`0018:04F3:3140`), which isn't a USB device and doesn't count either. USB
+  IDs were checked against the USB ID database (`/usr/share/hwdata/usb.ids`).

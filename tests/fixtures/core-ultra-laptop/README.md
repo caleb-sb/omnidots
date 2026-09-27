@@ -12,3 +12,8 @@ Wi-Fi, NPU, audio and bus controllers, not GPUs.
   host bridge, the GPU and the Wi-Fi card. Under `class/` it has a battery
   (`BAT0`), an AC adapter, the `intel_backlight` backlight and a Bluetooth
   adapter (placeholder files stand in for device directories).
+- `sysfs/bus/usb/devices` has a Goodix fingerprint reader (27c6:538c), plus
+  ordinary USB devices that don't count: the xHCI root hubs (1d6b), a Chicony
+  camera (04f2, one off Elan's 04f3), the Intel AX211 Bluetooth adapter (8087)
+  and the reader's interface entry `3-3:1.0`, which has no `idVendor`. Only `idVendor` and `idProduct` are mirrored; IDs
+  were checked against the USB ID database (`/usr/share/hwdata/usb.ids`).

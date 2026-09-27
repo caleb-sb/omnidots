@@ -5,8 +5,9 @@
 #
 # Dry-run: with DRY_RUN=1 nothing is executed. Every action prints one plan
 # line to stdout instead, as `<kind>: <detail>` (flag, conf, repo, pkg, swap,
-# backup, link, run, wait, gpu-order). The tests assert on these lines, so
-# keep the format stable.
+# backup, link, run, wait, gpu-order, and ask for a command the real run
+# offers and the user can skip). The tests assert on these lines, so keep the
+# format stable.
 # Logging goes to stderr so it never mixes with the plan.
 
 OMNIDOTS_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
