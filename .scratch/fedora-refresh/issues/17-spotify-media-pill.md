@@ -8,10 +8,10 @@ See spec: qs-bar (Media pill), User Stories 90–93.
 
 **Status:** ready-for-agent
 
-- [ ] A new media module uses Quickshell's MPRIS service, filtered to the Spotify player by identity or D-Bus name. Other players and browser tabs are ignored.
-- [ ] The pill sits after the workspaces in the left group. It's visible while Spotify has a track loaded (playing or paused) and hidden when Spotify closes.
-- [ ] The text reads "Title — Artist", elided at about 30 characters with an ellipsis. The previous, play/pause and next icon buttons reflect whether each action is available. The play/pause icon follows playback state.
-- [ ] Clicking the text focuses the Spotify window through Hyprland.
-- [ ] It uses the existing bar components (BarGroup, IconButton, StyledText) and the Night theme.
-- [ ] qs-bar's README documents the module.
-- [ ] Smoke check: qs-bar loads without QML errors where a session is available.
+- [x] A new media module uses Quickshell's MPRIS service, filtered to the Spotify player by identity or D-Bus name. Other players and browser tabs are ignored.
+- [x] The pill sits after the workspaces in the left group. It's visible while Spotify has a track loaded (playing or paused) and hidden when Spotify closes.
+- [x] The text reads "Title — Artist", elided at about 30 characters with an ellipsis. The previous, play/pause and next icon buttons reflect whether each action is available. The play/pause icon follows playback state.
+- [x] Clicking the text focuses the Spotify window through Hyprland.
+- [x] It uses the existing bar components (BarGroup, IconButton, StyledText) and the Night theme.
+- [x] qs-bar's README documents the module.
+- [x] Smoke check: qs-bar loads without QML errors where a session is available.

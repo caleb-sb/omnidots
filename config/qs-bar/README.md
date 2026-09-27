@@ -125,6 +125,30 @@ is in use (up to 10). Click one to switch to it.
 - **Dispatch:** the Lua config needs Lua syntax, so clicks send
   `hl.dsp.focus({ workspace = N })` rather than `workspace N`.
 
+## Media
+
+A pill after the workspaces shows what Spotify is playing, as
+"Title — Artist" cut to 30 characters with "…", followed by previous,
+play/pause and next buttons.
+
+- **Player:** only Spotify, matched by its MPRIS identity or D-Bus name
+  (`org.mpris.MediaPlayer2.spotify`, with or without an instance suffix).
+  Other players and browser tabs, including Spotify's web player, are
+  ignored.
+- **Visibility:** the pill shows while Spotify has a track loaded, playing or
+  paused. It hides before the first track loads, when playback is stopped,
+  and when Spotify closes.
+- **Buttons:** each one is greyed out and inactive when Spotify says that
+  action isn't available. The middle one shows pause while playing and play
+  otherwise.
+- **Focus:** click the text to focus Spotify's window, switching to its
+  workspace. It sends `hl.dsp.focus({ window = "class:(?i)spotify" })`, a
+  case-insensitive class match.
+- The media keys still go through playerctl, so they control whichever player
+  playerctl picks, not only Spotify.
+- The logic (picking the player, visibility, the text) lives in
+  `modules/media/media.js`, tested by `tests/media.bats`.
+
 ## Power and device monitor
 
 The leftmost pill shows memory used, disk used on `/`, and battery

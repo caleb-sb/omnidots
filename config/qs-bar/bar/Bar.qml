@@ -14,6 +14,7 @@ import qs.modules.notifications
 import qs.modules.clipboard
 import qs.modules.display
 import qs.modules.clock
+import qs.modules.media
 import qs.modules.workspaces
 import qs.modules.system
 import qs.modules.tray
@@ -210,6 +211,9 @@ Variants {
                 Workspaces {
                     screen: win.modelData
                 }
+
+                // Spotify's track and controls (hidden unless a track is loaded).
+                MediaPill {}
             }
 
             ClockText {
