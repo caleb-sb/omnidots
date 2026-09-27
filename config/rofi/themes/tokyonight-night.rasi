@@ -1,0 +1,95 @@
+// Tokyo Night (night), from folke/tokyonight.nvim's palette. tokyonight.nvim
+// ships no rofi extra; this follows its kitty colours (blue accent, bg_visual
+// selection).
+
+* {
+    bg:           #1a1b26;
+    bg-dark:      #16161e;
+    bg-highlight: #292e42;
+    bg-visual:    #283457;
+    fg:           #c0caf5;
+    fg-dark:      #a9b1d6;
+    comment:      #565f89;
+    blue:         #7aa2f7;
+    red:          #f7768e;
+
+    background-color: transparent;
+    text-color:       @fg;
+}
+
+window {
+    width:            40%;
+    background-color: @bg;
+    border:           2px;
+    border-color:     @blue;
+    border-radius:    15px;
+    padding:          20px;
+}
+
+mainbox {
+    spacing: 16px;
+}
+
+inputbar {
+    children:         [ prompt, entry ];
+    spacing:          8px;
+    padding:          8px;
+    background-color: @bg-dark;
+    border:           0 0 1px 0;
+    border-color:     @bg-highlight;
+    border-radius:    8px;
+}
+
+prompt {
+    text-color: @blue;
+}
+
+entry {
+    placeholder-color: @comment;
+    cursor:            text;
+}
+
+listview {
+    lines:     10;
+    spacing:   4px;
+    scrollbar: false;
+}
+
+element {
+    padding:       6px 8px;
+    spacing:       8px;
+    border-radius: 8px;
+}
+
+element normal.normal, element alternate.normal {
+    text-color: @fg-dark;
+}
+
+element normal.urgent, element alternate.urgent, element selected.urgent {
+    text-color: @red;
+}
+
+element selected.normal, element selected.active {
+    background-color: @bg-visual;
+    text-color:       @fg;
+}
+
+element normal.active, element alternate.active {
+    text-color: @blue;
+}
+
+element-icon {
+    size: 24px;
+}
+
+element-text, element-icon {
+    background-color: inherit;
+    text-color:       inherit;
+    vertical-align:   0.5;
+}
+
+message {
+    padding:          8px;
+    background-color: @bg-dark;
+    border-radius:    8px;
+}

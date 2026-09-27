@@ -1,6 +1,6 @@
 [%General]
 author=elkrien based on Arc Dark style
-comment=Catppuccin-Mocha-Rosewater
+comment=Tokyo Night (night)
 spread_menuitems=true
 left_tabs=true
 mirror_doc_tabs=true
@@ -73,7 +73,7 @@ menu_blur_radius=6
 tooltip_blur_radius=6
 
 [GeneralColors]
-window.color=#24283b
+window.color=#1a1b26
 base.color=#414868
 alt.base.color=#414868
 button.color=#c0caf5

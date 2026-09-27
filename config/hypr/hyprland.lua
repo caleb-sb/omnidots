@@ -32,6 +32,9 @@ hl.env("XCURSOR_THEME", "Bibata-Modern-Ice")
 hl.env("HYPRCURSOR_THEME", "Bibata-Modern-Ice")
 hl.env("HYPRCURSOR_SIZE", "24")
 hl.env("ELECTRON_OZONE_PLATFORM_HINT", "auto")
+-- Set here, not in the shell, so Qt apps launched from Hyprland are themed.
+hl.env("QT_QPA_PLATFORMTHEME", "qt6ct")
+hl.env("QT_STYLE_OVERRIDE", "kvantum")
 
 -----------------------
 ---- LOOK AND FEEL ----
@@ -45,9 +48,10 @@ hl.config({
         gaps_out      = 20,
         layout        = "dwindle",
 
+        -- Tokyo Night (night): blue to cyan, and the background.
         col = {
-            active_border   = { colors = { "rgba(0272E7ff)", "rgba(45CAFFff)" }, angle = 45 },
-            inactive_border = "rgba(24283bff)",
+            active_border   = { colors = { "rgba(7aa2f7ff)", "rgba(7dcfffff)" }, angle = 45 },
+            inactive_border = "rgba(1a1b26ff)",
         },
     },
 
@@ -136,7 +140,7 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("gsettings set org.gnome.desktop.interface icon-theme 'Tela-circle-purple-dark'")
     hl.exec_cmd("gsettings set org.gnome.desktop.interface cursor-theme 'Bibata-Modern-Ice'")
     hl.exec_cmd("gsettings set org.gnome.desktop.interface font-name 'FreeSans'")
-    hl.exec_cmd("gsettings set org.gnome.desktop.interface gtk-theme 'Andromeda-dark'")
+    hl.exec_cmd("gsettings set org.gnome.desktop.interface gtk-theme 'Tokyonight-Dark'")
     hl.exec_cmd("gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'")
     hl.exec_cmd("wl-paste --type text --watch cliphist store")
     hl.exec_cmd("wl-paste --type image --watch cliphist store")

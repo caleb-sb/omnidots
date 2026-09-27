@@ -11,7 +11,7 @@ hl.window_rule({ match = { class = "^(code-url-handler)$" },    opacity = "0.80 
 hl.window_rule({ match = { class = "^(kitty)$" },               opacity = "0.90 0.90" })
 hl.window_rule({ match = { class = "^(org.kde.ark)$" },         opacity = "0.80 0.80" })
 hl.window_rule({ match = { class = "^(nwg-look)$" },            opacity = "0.80 0.80" })
-hl.window_rule({ match = { class = "^(qt5ct)$" },               opacity = "0.80 0.80" })
+hl.window_rule({ match = { class = "^(qt6ct)$" },               opacity = "0.80 0.80" })
 
 hl.window_rule({ match = { class = "^(gnome-boxes)$" }, opacity = "0.80 0.80" }) -- Boxes-Gtk
 hl.window_rule({ match = { class = "^(discord)$" },     opacity = "0.90 0.90" }) -- Discord-Electron
@@ -24,7 +24,7 @@ hl.window_rule({ match = { class = "^(org.kde.polkit-kde-authentication-agent-1)
 
 ---- Floating ----
 
-hl.window_rule({ match = { class = "^(qt5ct)$" },                 float = true })
+hl.window_rule({ match = { class = "^(qt6ct)$" },                 float = true })
 hl.window_rule({ match = { class = "^(nwg-look)$" },              float = true })
 hl.window_rule({ match = { class = "^(org.kde.ark)$" },           float = true })
 hl.window_rule({ match = { class = "^(pavucontrol)$" },           float = true })

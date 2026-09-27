@@ -1,0 +1,10 @@
+// rofi: the launcher and clipboard picker. https://davatorium.github.io/rofi/
+
+configuration {
+    font:       "JetBrainsMono Nerd Font 12";
+    show-icons: true;
+    icon-theme: "Tela-circle-purple-dark";
+}
+
+// Looked up in ~/.config/rofi/themes/.
+@theme "tokyonight-night"
