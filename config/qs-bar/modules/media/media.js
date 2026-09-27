@@ -40,3 +40,20 @@ function label(title, artist) {
         return chars.join("");
     return chars.slice(0, MAX_CHARS - 1).join("").replace(/\s+$/, "") + "…";
 }
+
+// A track position or length in seconds as "m:ss", or "h:mm:ss" past an
+// hour. Anything that isn't a real time reads "0:00".
+function clock(seconds) {
+    const s = isFinite(seconds) && seconds > 0 ? Math.floor(seconds) : 0;
+    const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), sec = String(s % 60).padStart(2, "0");
+    return h > 0 ? `${h}:${String(m).padStart(2, "0")}:${sec}` : `${m}:${sec}`;
+}
+
+// The entry in Spotify's tray menu that hides its window to the tray
+// ("Minimize to Tray") or brings it back ("Show Spotify"), or null. Matched
+// by label, so an English Spotify only, and never anything else: its menu
+// also holds Exit.
+function trayEntry(entries, hide) {
+    const want = hide ? /^minimi[sz]e to tray$/i : /^show spotify$/i;
+    return entries.find(e => !e.isSeparator && want.test((e.text || "").trim())) || null;
+}

@@ -4,20 +4,36 @@ import qs.components
 
 // Bar item: the Spotify track as "Title — Artist" with previous, play/pause
 // and next buttons. Only there while Spotify has a track loaded. Clicking
-// the text focuses Spotify.
+// the text opens the media panel; right-clicking it hides Spotify's window
+// to the tray or shows it again, as its tray icon did.
 BarGroup {
     id: root
+
+    property bool active
+    signal clicked
 
     visible: Media.shown
     padding: 2
 
-    Item {
+    Rectangle {
         implicitWidth: label.implicitWidth + 28
-        implicitHeight: root.implicitHeight
+        implicitHeight: root.implicitHeight - root.padding * 2
+        radius: height / 2
+        color: root.active ? Theme.c.blue7 : "transparent"
+
+        Behavior on color {
+            CAnim {}
+        }
 
         StateLayer {
-            radius: height / 2
-            onClicked: Media.focus()
+            radius: parent.radius
+            acceptedButtons: Qt.LeftButton | Qt.RightButton
+            onClicked: e => {
+                if (e.button === Qt.RightButton)
+                    Media.toggleWindow();
+                else
+                    root.clicked();
+            }
         }
 
         StyledText {

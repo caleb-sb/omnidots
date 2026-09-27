@@ -118,6 +118,16 @@ Variants {
         }
 
         IpcHandler {
+            target: "media"
+            enabled: win.modelData === PrimaryScreen.screen
+
+            function toggle(): void {
+                if (Media.shown)
+                    popout.toggle("media", mediaPill, mediaPanel);
+            }
+        }
+
+        IpcHandler {
             target: "network"
             enabled: win.modelData === PrimaryScreen.screen
 
@@ -228,14 +238,20 @@ Variants {
                 spacing: Theme.spacing.large
 
                 // Spotify's track and controls (hidden unless a track is loaded).
-                MediaPill {}
+                MediaPill {
+                    id: mediaPill
+
+                    active: popout.open && popout.current === "media"
+                    onClicked: popout.toggle("media", mediaPill, mediaPanel)
+                }
 
                 // Tray apps (hidden when there are none).
                 BarGroup {
                     id: trayGroup
 
-                    // Tray icons for things the bar already has a module for.
-                    readonly property list<string> hidden: ["nm-applet", "blueman"]
+                    // Tray icons for things the bar already has a module for
+                    // (Spotify's: the media panel shows and hides its window).
+                    readonly property list<string> hidden: ["nm-applet", "blueman", Media.trayId]
 
                     visible: trayRepeater.count > 0
 
@@ -354,6 +370,14 @@ Variants {
             id: notifPanel
 
             NotifPanel {
+                onCloseRequested: popout.close()
+            }
+        }
+
+        Component {
+            id: mediaPanel
+
+            MediaPanel {
                 onCloseRequested: popout.close()
             }
         }

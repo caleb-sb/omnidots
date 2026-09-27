@@ -6,6 +6,7 @@ Quickshell bar, built one module at a time. Tokyo Night (night).
     qs -p ~/.config/qs-bar ipc call bluetooth toggle   # open/close the BT panel
     qs -p ~/.config/qs-bar ipc call audio toggle       # open/close the audio panel
     qs -p ~/.config/qs-bar ipc call network toggle     # open/close the network panel
+    qs -p ~/.config/qs-bar ipc call media toggle       # open/close the Spotify panel
     qs -p ~/.config/qs-bar ipc call notifications toggle   # also: dnd, clear
     qs -p ~/.config/qs-bar ipc call clipboard toggle   # open/close clipboard history
     qs -p ~/.config/qs-bar ipc call display toggle     # toggle render scale 1.5x <-> 2.5x
@@ -141,12 +142,23 @@ play/pause and next buttons.
 - **Buttons:** each one is greyed out and inactive when Spotify says that
   action isn't available. The middle one shows pause while playing and play
   otherwise.
-- **Focus:** click the text to focus Spotify's window, switching to its
-  workspace. It sends `hl.dsp.focus({ window = "class:(?i)spotify" })`, a
-  case-insensitive class match.
+- **Panel:** click the text to open the media panel: album art, title,
+  artist and album, a scrubber with the position and length, and previous,
+  play/pause and next with shuffle and repeat (off, playlist, track). Drag
+  the scrubber to seek when you let go, or scroll on it to jump 5 s.
+  Clicking the art brings Spotify's window up. The position is re-read
+  every second while the panel is open, since MPRIS doesn't push it.
+- **Window:** Spotify's own tray icon is hidden: all it did was hide the
+  window to the tray and show it again. The panel's "Hide to tray" / "Show
+  Spotify" button, or right-clicking the pill's text, does that instead by
+  triggering the same entries in Spotify's tray menu, matched by their
+  English labels. Showing also focuses the window, switching to its
+  workspace with `hl.dsp.focus({ window = "class:(?i)spotify" })`. Without
+  the tray menu, showing falls back to MPRIS Raise and hiding is disabled.
 - The media keys still go through playerctl, so they control whichever player
   playerctl picks, not only Spotify.
-- The logic (picking the player, visibility, the text) lives in
+- The logic (picking the player, visibility, the text, times, the tray
+  menu entries) lives in
   `modules/media/media.js`, tested by `tests/media.bats`.
 
 ## Power and device monitor

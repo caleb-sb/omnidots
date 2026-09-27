@@ -99,3 +99,35 @@ VLC='{ identity: "VLC media player", dbusName: "org.mpris.MediaPlayer2.vlc" }'
   run -0 js "label('😀'.repeat(40), '').endsWith('😀…')"
   [ "$output" = true ]
 }
+
+@test "formats track times as m:ss, or h:mm:ss past an hour" {
+  run -0 js "[clock(0), clock(7.9), clock(65), clock(599), clock(3600), clock(3725.4)]"
+  [ "$output" = '["0:00","0:07","1:05","9:59","1:00:00","1:02:05"]' ]
+}
+
+@test "formats a missing or nonsense time as 0:00" {
+  run -0 js "[clock(-1), clock(NaN), clock(undefined), clock(Infinity)]"
+  [ "$output" = '["0:00","0:00","0:00","0:00"]' ]
+}
+
+# Spotify's tray menu, as its StatusNotifierItem shows it: only one of the
+# first two entries is visible at a time, but both are matched by label.
+MENU='[{ text: "Minimize to Tray", id: "hide" }, { text: "Show Spotify", id: "show" }, { text: "", isSeparator: true }, { text: "Exit", id: "exit" }]'
+
+@test "finds the tray menu entry that hides or shows Spotify's window" {
+  run -0 js "trayEntry($MENU, true).id"
+  [ "$output" = '"hide"' ]
+  run -0 js "trayEntry($MENU, false).id"
+  [ "$output" = '"show"' ]
+  run -0 js "trayEntry([{ text: 'Minimise to tray', id: 'uk' }], true).id"
+  [ "$output" = '"uk"' ]
+}
+
+@test "never picks Exit or anything else when the entry is missing" {
+  run -0 js "trayEntry([{ text: 'Exit' }, { text: '', isSeparator: true }], true)"
+  [ "$output" = null ]
+  run -0 js "trayEntry([{ text: 'Exit' }], false)"
+  [ "$output" = null ]
+  run -0 js "trayEntry([], true)"
+  [ "$output" = null ]
+}

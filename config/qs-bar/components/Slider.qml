@@ -3,7 +3,8 @@ import qs.config
 
 // M3 expressive slider: thick active track, a gap, a bar handle, and a thin
 // inactive track. Emits moved(value) while dragging/clicking/scrolling; the
-// owner writes it back to `value`.
+// owner writes it back to `value`. released(value) follows the last moved of
+// a press, for owners that only act once the drag ends (seeking).
 Item {
     id: root
 
@@ -14,6 +15,7 @@ Item {
     property color accent: Theme.c.blue
     property bool dimmed
     signal moved(real value)
+    signal released(real value)
 
     readonly property bool pressed: area.pressed
     readonly property real frac: Math.max(0, Math.min(1, ((pressed ? dragValue : value) - from) / (to - from)))
@@ -124,6 +126,7 @@ Item {
         }
 
         onPressed: e => drag(e.x)
+        onReleased: root.released(root.dragValue)
         onPositionChanged: e => {
             if (pressed)
                 drag(e.x);
