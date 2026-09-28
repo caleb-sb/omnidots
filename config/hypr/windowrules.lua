@@ -4,11 +4,12 @@
 ---- Opacity ----
 
 hl.window_rule({ match = { class = "^(org.mozilla.firefox)$" }, opacity = "0.90 0.90" })
-hl.window_rule({ match = { class = "^(Brave-browser)$" },       opacity = "0.90 0.90" })
+hl.window_rule({ match = { class = "(?i)^(brave-browser)$" },   opacity = "0.90 0.90" })
 hl.window_rule({ match = { class = "^(Google-chrome)$" },       opacity = "0.90 0.90" })
 hl.window_rule({ match = { class = "(?i)^(spotify)$" },         opacity = "0.80 0.80" })
 hl.window_rule({ match = { class = "^(code-url-handler)$" },    opacity = "0.80 0.80" })
 hl.window_rule({ match = { class = "^(kitty)$" },               opacity = "0.90 0.90" })
+hl.window_rule({ match = { class = "(?i)^(thunar)$" },          opacity = "0.80 0.80" })
 hl.window_rule({ match = { class = "^(org.kde.ark)$" },         opacity = "0.80 0.80" })
 hl.window_rule({ match = { class = "^(nwg-look)$" },            opacity = "0.80 0.80" })
 hl.window_rule({ match = { class = "^(qt6ct)$" },               opacity = "0.80 0.80" })
@@ -25,6 +26,7 @@ hl.window_rule({ match = { class = "^(hyprpolkitagent)$" },      opacity = "0.80
 
 hl.window_rule({ match = { class = "^(qt6ct)$" },                 float = true })
 hl.window_rule({ match = { class = "^(nwg-look)$" },              float = true })
+hl.window_rule({ match = { class = "(?i)^(thunar)$" },          opacity = "0.80 0.80" })
 hl.window_rule({ match = { class = "^(org.kde.ark)$" },           float = true })
 hl.window_rule({ match = { class = "^(pavucontrol)$" },           float = true })
 hl.window_rule({ match = { class = "^(blueman-manager)$" },       float = true })

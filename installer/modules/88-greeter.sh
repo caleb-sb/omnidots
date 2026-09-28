@@ -21,6 +21,9 @@ set -euo pipefail
 # shellcheck source=installer/lib.sh
 source "$(dirname "${BASH_SOURCE[0]}")/../lib.sh"
 
+# As root, the greeter would log in root, with root's wallpaper (none).
+[[ $EUID -ne 0 ]] || die "Run this as your user, not root; it uses sudo where needed."
+
 GREETER_SRC="$OMNIDOTS_ROOT/greeter"
 SYSTEM_SRC="$OMNIDOTS_ROOT/installer/greeter"
 GREETER_DIR=/usr/local/share/omnidots-greeter
@@ -71,12 +74,19 @@ deploy_file() {
 
 # The greeter logs this user in, with no user field.
 GREETER_USER="$(id -un)"
-# The desktop's wallpaper: hyprpaper's first, with ~ expanded.
-WALLPAPER="$(sed -n 's/^wallpaper *= *[^,]*, *//p' "$OMNIDOTS_ROOT/config/hypr/hyprpaper.conf" | head -n 1)"
+# The desktop's wallpaper: the path of hyprpaper's first wallpaper block, with ~
+# expanded.
+WALLPAPER="$(sed -n 's/^[[:space:]]*path *= *//p' "$OMNIDOTS_ROOT/config/hypr/hyprpaper.conf" | head -n 1)"
 WALLPAPER="${WALLPAPER/#\~/$HOME}"
 
-# deploy_greeter — deploy the greeter with its `user` file and its
-# `background`, the wallpaper. Without the wallpaper the background is plain.
+# This machine's Hyprland overrides, for the desktop's monitor rules (see
+# greeter/hyprland.lua). Rerun this module after changing them.
+OVERRIDE="$OMNIDOTS_ROOT/config/hypr/override.lua"
+
+# deploy_greeter — deploy the greeter with its `user` file, its `background`,
+# the wallpaper, and `desktop-monitors.lua`, this machine's overrides. Without
+# the wallpaper the background is plain; without overrides every output has
+# automatic scale.
 deploy_greeter() {
   if is_dry_run; then
     plan deploy "$GREETER_SRC + user $GREETER_USER + background $WALLPAPER -> $GREETER_DIR"
@@ -90,6 +100,9 @@ deploy_greeter() {
     cp "$WALLPAPER" "$staging/background"
   else
     log_warn "The wallpaper ($WALLPAPER) isn't there; the login screen's background will be plain."
+  fi
+  if [[ -f $OVERRIDE ]]; then
+    cp "$OVERRIDE" "$staging/desktop-monitors.lua"
   fi
   deploy_dir "$staging" "$GREETER_DIR"
   rm -rf "$staging"

@@ -115,6 +115,7 @@ repo: flathub" ]
   assert_line "link: $home/.config/fish -> $REPO_ROOT/config/fish"
   assert_line "link: $home/.config/starship.toml -> $REPO_ROOT/config/starship.toml"
   assert_line "link: $home/.local/share/applications/nvim.desktop -> $REPO_ROOT/applications/nvim.desktop"
+  assert_line "link: $home/.config/systemd/user/hyprland-session.target -> $REPO_ROOT/systemd/hyprland-session.target"
   [ -z "$(ls -A "$home")" ]
 }
 
@@ -608,7 +609,7 @@ greeter_steps() {
     "pkg: tuigreet" \
     "pkg: gnome-keyring" \
     "pkg: gnome-keyring-pam" \
-    "deploy: $REPO_ROOT/greeter + user $(id -un) + background $BATS_TEST_TMPDIR/home/.config/hypr/papers/Staircase.png -> /usr/local/share/omnidots-greeter" \
+    "deploy: $REPO_ROOT/greeter + user $(id -un) + background $BATS_TEST_TMPDIR/home/.config/hypr/papers/commodore.jpg -> /usr/local/share/omnidots-greeter" \
     "deploy: $fonts/JetBrainsMonoNerdFont/JetBrainsMonoNerdFontPropo-*.ttf $fonts/JetBrainsMonoNerdFont/JetBrainsMonoNerdFont-Regular.ttf $fonts/JetBrainsMonoNerdFont/JetBrainsMonoNerdFont-Bold.ttf $fonts/MaterialSymbolsRounded/MaterialSymbolsRounded.ttf -> /usr/local/share/fonts/omnidots-greeter" \
     "deploy: $REPO_ROOT/installer/greeter/omnidots-greeter.sh -> /usr/local/bin/omnidots-greeter" \
     "deploy: $REPO_ROOT/installer/greeter/greetd.toml -> /etc/greetd/config.toml" \

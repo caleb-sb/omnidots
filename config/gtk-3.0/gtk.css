@@ -1,0 +1,74 @@
+/* Loaded after the Tokyonight-Dark theme, in every GTK 3 app. Colours are
+   Tokyo Night (night), as in qs-bar's Theme.qml. */
+
+/* The theme gives selected tree-view rows (Thunar's sidebar, list views) its
+   light variant's colours: a white bar with dark text. */
+treeview.view:selected,
+treeview.view:selected:focus,
+.thunar .shortcuts-pane treeview.view:selected {
+  background-color: #394b70;
+  color: #c0caf5;
+}
+
+/* Thunar's sidebar: darker than the file view, with symbolic icons. */
+.thunar .shortcuts-pane treeview.view {
+  background-color: #16161e;
+  -gtk-icon-style: symbolic;
+}
+
+/* Rows spaced like qs-bar's panel lists, the selected one the file view's
+   colour with blue text. */
+.thunar .shortcuts-pane treeview.view {
+  padding: 5px 2px;
+  -GtkTreeView-vertical-separator: 4;
+  -GtkTreeView-horizontal-separator: 8;
+}
+
+.thunar .shortcuts-pane treeview.view:selected {
+  background-color: #323449;
+  color: #7aa2f7;
+}
+
+/* The file view as a rounded card on the sidebar's background. The view
+   itself is transparent, since GTK 3 doesn't clip it to the corners. */
+window.thunar,
+window.thunar paned,
+.thunar menubar,
+.thunar toolbar,
+.thunar notebook,
+.thunar notebook > stack {
+  background-color: #16161e;
+}
+
+.thunar .standard-view.frame {
+  margin: 4px 8px 0 0;
+  border-radius: 14px;
+  background-color: #323449;
+}
+
+.thunar .standard-view.frame .view:not(:selected) {
+  background-color: transparent;
+}
+
+/* No divider lines between the card, the sidebar, the toolbar and the
+   status bar; the background separates them. GtkPaned makes the divider as
+   wide as its margin box, which the theme's padding and negative margin
+   cancel out, leaving min-width; at 0 it uses the paned's handle-size
+   instead (gtk_paned_measure_handle), 5px by default. */
+window.thunar paned {
+  -GtkPaned-handle-size: 0;
+}
+
+window.thunar paned > separator {
+  background-image: none;
+  min-width: 0;
+}
+
+.thunar toolbar {
+  box-shadow: none;
+}
+
+.thunar statusbar {
+  border-top: none;
+}
+

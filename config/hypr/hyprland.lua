@@ -155,7 +155,17 @@ hl.gesture({
 -------------------
 
 hl.on("hyprland.start", function()
-    hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP")
+    -- The session's environment for D-Bus and systemd services, then
+    -- graphical-session.target (see systemd/hyprland-session.target), which
+    -- the portals need. Stopped first, so a new login doesn't keep services
+    -- a previous one started with its environment.
+    hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP HYPRLAND_INSTANCE_SIGNATURE"
+        .. " && systemctl --user stop hyprland-session.target"
+        .. " && systemctl --user start hyprland-session.target")
+    -- The keyring daemon greetd's PAM stack started and unlocked quits after
+    -- two minutes unless this finishes starting it (GNOME's autostart does it
+    -- there). Otherwise the first app to want a secret gets a new, locked one.
+    hl.exec_cmd("gnome-keyring-daemon --start --components=secrets")
     hl.exec_cmd("blueman-applet")
     hl.exec_cmd("systemctl --user start hyprpolkitagent")
     hl.exec_cmd("qs -p ~/.config/qs-bar")

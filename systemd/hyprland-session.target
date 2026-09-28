@@ -1,0 +1,12 @@
+# Hyprland's graphical-session.target, which config/hypr/hyprland.lua starts.
+# UWSM or a GNOME session would start that target; start-hyprland doesn't, and
+# xdg-desktop-portal refuses to start outside it (Requisite=). Without the
+# portal, Flatpak apps draw their own unthemed file chooser in the sandbox.
+# graphical-session.target stops when this does, and its services with it.
+
+[Unit]
+Description=Hyprland session
+BindsTo=graphical-session.target
+Before=graphical-session.target
+Wants=graphical-session-pre.target
+After=graphical-session-pre.target

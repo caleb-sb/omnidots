@@ -142,3 +142,28 @@ not_called() {
   [ -n "$desktop" ]
   [ "${greeter//[[:space:]]/}" = "${desktop//[[:space:]]/}" ]
 }
+
+@test "the greeter's outputs take the desktop's monitor rules from its override.lua, and nothing else from it" {
+  command -v luajit >/dev/null || skip "luajit is not installed"
+  local dir="$BATS_TEST_TMPDIR/greeter"
+  mkdir -p "$dir"
+  cp "$BATS_TEST_DIRNAME/../greeter/hyprland.lua" "$dir/"
+  # shellcheck disable=SC2016 # Lua code
+  local main='dofile(CONFIG_DIR .. "/hyprland.lua")'
+
+  run -0 luajit "$BATS_TEST_DIRNAME/hypr-stub.lua" "$dir" "$main"
+  [ "$(grep '^monitor' <<<"$output")" = 'monitor  preferred auto auto' ]
+
+  cp "$BATS_TEST_DIRNAME/../config/hypr/override.example.lua" "$dir/desktop-monitors.lua"
+  cat >>"$dir/desktop-monitors.lua" <<'LUA'
+require("monitors").primary = "DP-2"
+hl.env("SHOULD_NOT", "leak")
+hl.monitor({ output = "eDP-1", mode = "2560x1600@144", position = "0x0", scale = 1.25 })
+LUA
+  run -0 luajit "$BATS_TEST_DIRNAME/hypr-stub.lua" "$dir" "$main"
+  [ "$(grep '^monitor' <<<"$output")" = "$(printf '%s\n' \
+    'monitor  preferred auto auto' \
+    'monitor DP-2 3840x2160@144 0x0 1.5' \
+    'monitor eDP-1 2560x1600@144 0x0 1.25')" ]
+  run ! grep -q SHOULD_NOT <<<"$output"
+}

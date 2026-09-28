@@ -58,6 +58,7 @@ ffmpegthumbnailer
 file-roller
 
 # Audio
+alsa-sof-firmware     # DSP firmware for Intel SOF audio; minimal installs lack it
 pamixer
 playerctl             # media keys
 pavucontrol
@@ -84,6 +85,7 @@ wget2
 golang
 rustup                # rustup-init; 70-dev-tools.sh runs it
 python3
+gh
 
 # Apps
 brave-browser

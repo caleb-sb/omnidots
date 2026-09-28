@@ -8,10 +8,12 @@ bats_require_minimum_version 1.5.0
 
 setup() {
   REPO="$BATS_TEST_TMPDIR/repo"
-  mkdir -p "$REPO/config/hypr" "$REPO/config/fish" "$REPO/applications"
+  mkdir -p "$REPO/config/hypr" "$REPO/config/fish" "$REPO/applications" \
+    "$REPO/systemd"
   cp -r "$BATS_TEST_DIRNAME/../installer" "$REPO/"
   touch "$REPO/config/hypr/hyprland.conf" "$REPO/config/fish/config.fish" \
-    "$REPO/config/starship.toml" "$REPO/applications/nvim.desktop"
+    "$REPO/config/starship.toml" "$REPO/applications/nvim.desktop" \
+    "$REPO/systemd/hyprland-session.target"
 
   export HOME="$BATS_TEST_TMPDIR/home"
   unset XDG_CONFIG_HOME XDG_DATA_HOME
@@ -30,7 +32,7 @@ assert_linked() {
   fi
 }
 
-@test "fresh HOME: links each config entry and the desktop entry" {
+@test "fresh HOME: links each config entry, the desktop entry and the unit" {
   link_step
   [ "$status" -eq 0 ]
   assert_linked "$HOME/.config/hypr" "$REPO/config/hypr"
@@ -38,6 +40,10 @@ assert_linked() {
   assert_linked "$HOME/.config/starship.toml" "$REPO/config/starship.toml"
   assert_linked "$HOME/.local/share/applications/nvim.desktop" \
     "$REPO/applications/nvim.desktop"
+  # Into the unit dir, which stays a real dir.
+  assert_linked "$HOME/.config/systemd/user/hyprland-session.target" \
+    "$REPO/systemd/hyprland-session.target"
+  [ ! -L "$HOME/.config/systemd" ]
 }
 
 @test "re-run: succeeds, leaves correct links alone and nests nothing" {

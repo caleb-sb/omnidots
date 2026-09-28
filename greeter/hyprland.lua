@@ -24,6 +24,31 @@ hl.monitor({
     scale    = "auto",
 })
 
+-- Then the desktop's own monitor rules, from its override.lua, which
+-- 88-greeter.sh copies here as desktop-monitors.lua. Each output gets the
+-- scale it has on the desktop, so the login form comes out the size of
+-- hyprlock's input field; with automatic scale it can be much bigger (e.g.
+-- a 2560x1600 panel the desktop scales 1.25). Only its hl.monitor calls are
+-- kept; the rest of it is meant for the desktop.
+local config_dir = debug.getinfo(1, "S").source:match("^@(.*/)") or "./"
+local desktop_monitors = config_dir .. "desktop-monitors.lua"
+local function ignore()
+    return setmetatable({}, { __index = ignore, __call = ignore })
+end
+local rules = {}
+local env = setmetatable({
+    hl = setmetatable({ monitor = function(rule) rules[#rules + 1] = rule end }, { __index = ignore }),
+    require = ignore,
+}, { __index = _G })
+local chunk = loadfile(desktop_monitors, "t", env)
+if chunk then
+    if setfenv then setfenv(chunk, env) end
+    pcall(chunk)
+    for _, rule in ipairs(rules) do
+        hl.monitor(rule)
+    end
+end
+
 -- The cursor theme lives in the user's home, which this user can't read, so
 -- Hyprland's default cursor it is.
 hl.env("XCURSOR_SIZE", "24")
