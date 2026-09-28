@@ -1,4 +1,4 @@
-# AMD GPUs (HAS_AMD_GPU=1). The GPU module also swaps Mesa's VA drivers for
-# the freeworld build, which adds H.264 and HEVC decode.
+# AMD GPUs (HAS_AMD_GPU=1). The GPU module also installs RPM Fusion's
+# freeworld VA drivers, which add H.264 and HEVC decode.
 
 mesa-vulkan-drivers   # RADV Vulkan

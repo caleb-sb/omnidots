@@ -64,17 +64,12 @@ fi
 
 ((${#lists[@]} == 0)) || install_package_list "${lists[@]}"
 
-# Mesa drives AMD and Intel GPUs. Fedora's Mesa VA drivers lack H.264 and HEVC.
-# Only swap once: the freeworld build provides mesa-va-drivers itself, so a
-# second swap asks dnf to remove and install the same package, which it
-# can't resolve.
+# Mesa drives AMD and Intel GPUs. Fedora's Mesa VA drivers lack H.264 and HEVC,
+# so RPM Fusion's freeworld build is installed next to them, in its own
+# directory. Not swapped: from Fedora 44 mesa-dri-drivers provides
+# mesa-va-drivers, so `dnf swap mesa-va-drivers …` would remove Mesa itself.
 if has_flag HAS_AMD_GPU || has_flag HAS_INTEL_GPU; then
-  if rpm -q --quiet mesa-va-drivers-freeworld; then
-    log_info "Mesa's freeworld VA drivers are already installed"
-  else
-    act swap "mesa-va-drivers -> mesa-va-drivers-freeworld" \
-      sudo dnf swap -y mesa-va-drivers mesa-va-drivers-freeworld
-  fi
+  install_packages mesa-va-drivers-freeworld
 fi
 
 if has_flag HAS_HYBRID_GPU; then

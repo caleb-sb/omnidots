@@ -177,7 +177,7 @@ repo: flathub" ]
   assert_line "flag: HAS_LEGACY_INTEL_GPU=0"
   assert_line "flag: HAS_NVIDIA=0"
   assert_line "pkg: intel-media-driver"
-  assert_line "swap: mesa-va-drivers -> mesa-va-drivers-freeworld"
+  assert_line "pkg: mesa-va-drivers-freeworld"
   refute_line "pkg: libva-intel-driver"
   refute_line "pkg: akmod-nvidia"
   refute_line "pkg: libva-nvidia-driver"
@@ -212,7 +212,7 @@ repo: flathub" ]
   for pkg in akmod-nvidia xorg-x11-drv-nvidia-cuda libva-nvidia-driver; do
     assert_line "pkg: $pkg"
   done
-  assert_line "swap: mesa-va-drivers -> mesa-va-drivers-freeworld"
+  assert_line "pkg: mesa-va-drivers-freeworld"
   refute_line "pkg: intel-media-driver"
   refute_line "pkg: libva-intel-driver"
   refute_match grub
@@ -300,21 +300,20 @@ pkg: akmod-nvidia" ]
   refute_match 'nvidia-runtime-pm|^gpu-order: '
 }
 
-@test "an NVIDIA-only machine gets no freeworld swap" {
+@test "an NVIDIA-only machine gets no freeworld VA drivers" {
   plan_for desktop HAS_AMD_GPU=0
   [ "$status" -eq 0 ]
   assert_line "pkg: akmod-nvidia"
   refute_match freeworld
 }
 
-@test "a rerun skips the freeworld swap once it's installed" {
-  # The freeworld build provides mesa-va-drivers, so swapping again would
-  # ask dnf to remove and install the same package.
-  printf '#!/bin/sh\ncase "$*" in *mesa-va-drivers-freeworld*) exit 0 ;; esac\necho "package is not installed"\nexit 1\n' >"$RPM_STUB/rpm"
+@test "the freeworld VA drivers are installed next to Mesa, never swapped in" {
+  # From Fedora 44 mesa-dri-drivers provides mesa-va-drivers, so swapping
+  # mesa-va-drivers out would remove Mesa itself.
   plan_for core-ultra-laptop
   [ "$status" -eq 0 ]
-  assert_line "pkg: intel-media-driver"
-  refute_match freeworld
+  assert_line "pkg: mesa-va-drivers-freeworld"
+  refute_match '^swap: mesa'
 }
 
 @test "desktop: Bluetooth, but no battery or backlight" {

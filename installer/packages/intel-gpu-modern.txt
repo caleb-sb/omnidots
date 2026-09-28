@@ -1,5 +1,5 @@
 # Intel GPUs from Broadwell on (HAS_INTEL_GPU=1, HAS_LEGACY_INTEL_GPU=0).
-# The GPU module also swaps Mesa's VA drivers for the freeworld build.
+# The GPU module also installs RPM Fusion's freeworld VA drivers.
 
 intel-media-driver    # VA-API (iHD), RPM Fusion nonfree
 mesa-vulkan-drivers   # ANV Vulkan
