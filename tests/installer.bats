@@ -307,6 +307,16 @@ pkg: akmod-nvidia" ]
   refute_match freeworld
 }
 
+@test "a rerun skips the freeworld swap once it's installed" {
+  # The freeworld build provides mesa-va-drivers, so swapping again would
+  # ask dnf to remove and install the same package.
+  printf '#!/bin/sh\ncase "$*" in *mesa-va-drivers-freeworld*) exit 0 ;; esac\necho "package is not installed"\nexit 1\n' >"$RPM_STUB/rpm"
+  plan_for core-ultra-laptop
+  [ "$status" -eq 0 ]
+  assert_line "pkg: intel-media-driver"
+  refute_match freeworld
+}
+
 @test "desktop: Bluetooth, but no battery or backlight" {
   plan_for desktop
   [ "$status" -eq 0 ]

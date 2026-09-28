@@ -65,9 +65,16 @@ fi
 ((${#lists[@]} == 0)) || install_package_list "${lists[@]}"
 
 # Mesa drives AMD and Intel GPUs. Fedora's Mesa VA drivers lack H.264 and HEVC.
+# Only swap once: the freeworld build provides mesa-va-drivers itself, so a
+# second swap asks dnf to remove and install the same package, which it
+# can't resolve.
 if has_flag HAS_AMD_GPU || has_flag HAS_INTEL_GPU; then
-  act swap "mesa-va-drivers -> mesa-va-drivers-freeworld" \
-    sudo dnf swap -y mesa-va-drivers mesa-va-drivers-freeworld
+  if rpm -q --quiet mesa-va-drivers-freeworld; then
+    log_info "Mesa's freeworld VA drivers are already installed"
+  else
+    act swap "mesa-va-drivers -> mesa-va-drivers-freeworld" \
+      sudo dnf swap -y mesa-va-drivers mesa-va-drivers-freeworld
+  fi
 fi
 
 if has_flag HAS_HYBRID_GPU; then
