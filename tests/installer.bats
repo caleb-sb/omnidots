@@ -798,3 +798,15 @@ greeter_steps() {
   [ "$status" -eq 0 ]
   refute_match alacritty
 }
+
+@test "--terminal: plans without awk, which a bare WSL distro lacks" {
+  local bin="$BATS_TEST_TMPDIR/bin"
+  mkdir -p "$bin"
+  for cmd in /usr/bin/*; do
+    case "${cmd##*/}" in awk | gawk | mawk | nawk) ;; *) ln -s "$cmd" "$bin/" ;; esac
+  done
+  plan_for desktop PATH="$RPM_STUB:$bin" WITH_DESKTOP=0
+  [ "$status" -eq 0 ]
+  assert_line "pkg: gawk"
+  assert_line "pkg: fish"
+}

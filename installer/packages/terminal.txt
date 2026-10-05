@@ -16,6 +16,7 @@ tree
 
 # CLI tools
 curl
+diffutils             # cmp, for the WSL Alacritty copy
 gawk
 git
 gzip                  # for tar, on .tar.gz releases

@@ -106,11 +106,15 @@ install_flatpaks() {
 }
 
 # package_list <name> — print the packages in packages/<name>.txt, one per
-# line. Lists hold one package per line; `#` starts a comment.
+# line. Lists hold one package per line; `#` starts a comment. Plain bash,
+# since this reads the list that installs awk on a bare WSL distro.
 package_list() {
-  local file="$PACKAGES_DIR/$1.txt"
+  local file="$PACKAGES_DIR/$1.txt" line pkg
   [[ -f $file ]] || die "Package list not found: $file"
-  awk '{ sub(/#.*/, "") } NF { print $1 }' "$file"
+  while IFS= read -r line || [[ -n $line ]]; do
+    read -r pkg _ <<<"${line%%#*}"
+    [[ -z $pkg ]] || printf '%s\n' "$pkg"
+  done <"$file"
 }
 
 # fetch <url> — print a URL's body. With OMNIDOTS_RELEASES_DIR set, print the
