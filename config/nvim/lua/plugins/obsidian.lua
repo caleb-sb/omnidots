@@ -1,28 +1,23 @@
-vim.keymap.set("n", "<leader>od", ":ObsidianToday<CR>")
+local vault = vim.fn.expand("~/Documents/obsidian-sync")
 
 return {
-  "epwalsh/obsidian.nvim",
+  "obsidian-nvim/obsidian.nvim",
   version = "*", -- recommended, use latest release instead of latest commit
-  lazy = true,
-  ft = "markdown",
-  -- Replace the above line with this if you only want to load obsidian.nvim for markdown files in your vault:
-  -- event = {
-  --   -- If you want to use the home shortcut '~' here you need to call 'vim.fn.expand'.
-  --   -- E.g. "BufReadPre " .. vim.fn.expand "~" .. "/my-vault/**.md"
-  --   "BufReadPre /home/caleb/workspace/vault/**.md",
-  --   "BufNewFile /home/caleb/workspace/vault/**.md",
-  -- },
-  dependencies = {
-    -- Required.
-    "nvim-lua/plenary.nvim",
-
-    -- see below for full list of optional dependencies 👇
+  -- Only load for markdown files inside the vault, or when asked for directly.
+  event = {
+    "BufReadPre " .. vault .. "/**.md",
+    "BufNewFile " .. vault .. "/**.md",
+  },
+  cmd = "Obsidian",
+  keys = {
+    { "<leader>od", "<cmd>Obsidian today<cr>", desc = "Obsidian daily note" },
   },
   opts = {
+    legacy_commands = false,
     workspaces = {
       {
-        name = "work",
-        path = "~/workspace/notebook",
+        name = "personal",
+        path = vault,
       },
     },
     daily_notes = {
