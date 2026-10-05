@@ -16,9 +16,11 @@ setup() {
   mkdir -p "$RPM_STUB"
   printf '#!/bin/sh\necho "package is not installed"\nexit 1\n' >"$RPM_STUB/rpm"
   chmod +x "$RPM_STUB/rpm"
+  INSTALL_ARGS=()
 }
 
-# plan_for <fixture> [VAR=value...] — dry-run the installer against a fixture.
+# plan_for <fixture> [VAR=value...] — dry-run the installer against a fixture,
+# with INSTALL_ARGS as extra arguments.
 plan_for() {
   local fixture="$1"
   shift
@@ -26,13 +28,14 @@ plan_for() {
   run --separate-stderr env -u HAS_NVIDIA -u HAS_AMD_GPU -u HAS_INTEL_GPU \
     -u HAS_LEGACY_INTEL_GPU -u HAS_HYBRID_GPU -u HAS_BATTERY -u HAS_BACKLIGHT \
     -u HAS_BLUETOOTH -u HAS_FPRINT -u WITH_GAMING -u WITH_ANDROID \
-    -u XDG_CONFIG_HOME -u XDG_DATA_HOME HOME="$BATS_TEST_TMPDIR/home" \
+    -u WITH_DESKTOP -u WSL_DISTRO_NAME -u XDG_CONFIG_HOME -u XDG_DATA_HOME \
+    -u XDG_STATE_HOME HOME="$BATS_TEST_TMPDIR/home" \
     OMNIDOTS_OPT_DIR="$BATS_TEST_TMPDIR/opt" \
     OMNIDOTS_SYSFS_ROOT="$FIXTURES/$fixture/sysfs" \
     OMNIDOTS_LSPCI_FILE="$FIXTURES/$fixture/lspci.txt" \
     OMNIDOTS_OS_RELEASE="$FIXTURES/os-release" \
     OMNIDOTS_RELEASES_DIR="$FIXTURES/releases" PATH="$RPM_STUB:$PATH" \
-    "$@" "$REPO_ROOT/install.sh" --dry-run
+    "$@" "$REPO_ROOT/install.sh" --dry-run "${INSTALL_ARGS[@]}"
 }
 
 assert_line() {
@@ -132,7 +135,7 @@ repo: flathub" ]
   mkdir -p "$stubs"
   for cmd in sudo dnf rpm mokutil kmodgenca akmods modinfo systemctl tuned-adm \
     authselect fprintd-list fprintd-enroll curl gpg flatpak usermod rustup-init \
-    pnpm bun claude tar fc-cache; do
+    pnpm bun claude tar fc-cache cmd.exe wslpath; do
     printf '#!/bin/sh\necho "%s $*" >>"%s"\n' "$cmd" "$BATS_TEST_TMPDIR/calls" >"$stubs/$cmd"
     chmod +x "$stubs/$cmd"
   done
@@ -140,6 +143,10 @@ repo: flathub" ]
     plan_for "$fixture" PATH="$stubs:$PATH" WITH_GAMING=1 WITH_ANDROID=1
     [ "$status" -eq 0 ]
   done
+  plan_for desktop PATH="$stubs:$PATH" WITH_DESKTOP=0 \
+    WSL_DISTRO_NAME=FedoraLinux-44 OMNIDOTS_APPDATA="$BATS_TEST_TMPDIR/appdata"
+  [ "$status" -eq 0 ]
+  [ ! -e "$BATS_TEST_TMPDIR/appdata" ]
   # Only read-only queries ran: the installed versions of the release rpms.
   touch "$BATS_TEST_TMPDIR/calls"
   run grep -v '^rpm -q ' "$BATS_TEST_TMPDIR/calls"
@@ -649,4 +656,145 @@ greeter_steps() {
   [ "$status" -eq 0 ]
   greeter_at="$(grep -nxF -- "$first" <<<"$output" | cut -d: -f1)"
   [ "$(grep -n '^ask: fprintd-enroll' <<<"$output" | cut -d: -f1)" -gt "$greeter_at" ]
+}
+
+# The terminal-only profile: what a WSL distro or a server gets.
+
+@test "--terminal: no hardware detection and no optional modules" {
+  INSTALL_ARGS=(--terminal)
+  plan_for desktop
+  [ "$status" -eq 0 ]
+  assert_line "flag: WITH_DESKTOP=0"
+  refute_match '^flag: (HAS_|WITH_GAMING|WITH_ANDROID)'
+}
+
+@test "--terminal plans the same as WITH_DESKTOP=0" {
+  INSTALL_ARGS=(--terminal)
+  plan_for desktop
+  [ "$status" -eq 0 ]
+  local by_flag="$output"
+  INSTALL_ARGS=()
+  plan_for desktop WITH_DESKTOP=0
+  [ "$status" -eq 0 ]
+  [ "$output" = "$by_flag" ]
+}
+
+@test "the desktop is the default, and every desktop plan says so" {
+  plan_for desktop
+  [ "$status" -eq 0 ]
+  assert_line "flag: WITH_DESKTOP=1"
+}
+
+@test "rejects a WITH_DESKTOP that isn't 0 or 1" {
+  plan_for desktop WITH_DESKTOP=no
+  [ "$status" -eq 1 ]
+}
+
+@test "--terminal: dnf settings and Docker's repo, no other repo" {
+  plan_for desktop WITH_DESKTOP=0
+  [ "$status" -eq 0 ]
+  assert_line "conf: /etc/dnf/dnf.conf max_parallel_downloads=10"
+  assert_line "conf: /etc/dnf/dnf.conf defaultyes=True"
+  assert_line "pkg: dnf5-plugins"
+  [ "$(grep '^repo: ' <<<"$output")" = "repo: docker-ce" ]
+}
+
+@test "--terminal: the terminal packages and none of the desktop's" {
+  plan_for desktop WITH_DESKTOP=0
+  [ "$status" -eq 0 ]
+  for pkg in fish neovim tmux bat fzf ripgrep git gcc make golang rustup \
+    python3 gh jq tar gzip xz procps-ng which; do
+    assert_line "pkg: $pkg"
+  done
+  for pkg in hyprland quickshell kitty rofi flatpak Thunar brave-browser \
+    google-chrome-stable pciutils sassc tuned greetd; do
+    refute_line "pkg: $pkg"
+  done
+}
+
+@test "every machine: the terminal packages, desktops included" {
+  plan_for desktop
+  [ "$status" -eq 0 ]
+  for pkg in fish neovim tmux git gcc golang gh; do
+    assert_line "pkg: $pkg"
+  done
+}
+
+@test "--terminal: links the shell, editor and git configs, nothing of the desktop's" {
+  local home="$BATS_TEST_TMPDIR/home"
+  plan_for desktop WITH_DESKTOP=0
+  [ "$status" -eq 0 ]
+  for entry in fish git nvim starship.toml tmux; do
+    assert_line "link: $home/.config/$entry -> $REPO_ROOT/config/$entry"
+  done
+  [ "$(grep -c '^link: ' <<<"$output")" -eq 5 ]
+  [ -z "$(ls -A "$home")" ]
+}
+
+@test "--terminal: fish becomes the login shell; the desktop's is left alone" {
+  plan_for desktop WITH_DESKTOP=0
+  [ "$status" -eq 0 ]
+  assert_line "run: sudo usermod --shell /usr/bin/fish $(id -un)"
+
+  plan_for desktop
+  [ "$status" -eq 0 ]
+  refute_match 'usermod --shell'
+}
+
+@test "--terminal: dev tools, Docker, starship and lazygit, and nothing of the desktop" {
+  local home="$BATS_TEST_TMPDIR/home"
+  plan_for desktop WITH_DESKTOP=0
+  [ "$status" -eq 0 ]
+  assert_line "run: rustup-init -y --no-modify-path"
+  assert_line "run: curl -fsSL https://get.pnpm.io/install.sh | sh -"
+  assert_line "run: curl -fsSL https://bun.sh/install | bash"
+  assert_line "run: curl -fsSL https://claude.ai/install.sh | bash"
+  for pkg in docker-ce docker-ce-cli containerd.io docker-buildx-plugin \
+    docker-compose-plugin; do
+    assert_line "pkg: $pkg"
+  done
+  assert_line "run: sudo systemctl enable --now docker"
+  assert_line "run: sudo usermod -aG docker $(id -un)"
+  assert_line "release: starship 1.26.0 https://github.com/starship/starship/releases/download/v1.26.0/starship-x86_64-unknown-linux-musl.tar.gz -> $home/.local/bin/starship"
+  assert_line "release: lazygit 0.65.1 https://github.com/jesseduffield/lazygit/releases/download/v0.65.1/lazygit_0.65.1_linux_x86_64.tar.gz -> $home/.local/bin/lazygit"
+  refute_match 'open-whispr|proton|flatpak|tela|bibata|tokyonight|nerd-font|fc-cache|greetd|tuned|akmod|fprint|deploy: |android'
+}
+
+@test "records the profile it installs" {
+  local state="$BATS_TEST_TMPDIR/home/.local/state/omnidots/profile"
+  plan_for desktop
+  [ "$status" -eq 0 ]
+  assert_line "profile: $state desktop"
+
+  plan_for desktop WITH_DESKTOP=0
+  [ "$status" -eq 0 ]
+  assert_line "profile: $state terminal"
+}
+
+@test "a re-run keeps the recorded terminal profile, unless WITH_DESKTOP=1" {
+  mkdir -p "$BATS_TEST_TMPDIR/home/.local/state/omnidots"
+  echo terminal >"$BATS_TEST_TMPDIR/home/.local/state/omnidots/profile"
+  plan_for desktop
+  [ "$status" -eq 0 ]
+  assert_line "flag: WITH_DESKTOP=0"
+  refute_line "pkg: hyprland"
+
+  plan_for desktop WITH_DESKTOP=1
+  [ "$status" -eq 0 ]
+  assert_line "flag: WITH_DESKTOP=1"
+  assert_line "pkg: hyprland"
+}
+
+@test "under WSL: writes the Alacritty config into Windows' %APPDATA%" {
+  local appdata="$BATS_TEST_TMPDIR/appdata"
+  plan_for desktop WITH_DESKTOP=0 WSL_DISTRO_NAME=FedoraLinux-44 \
+    OMNIDOTS_APPDATA="$appdata"
+  [ "$status" -eq 0 ]
+  assert_line "deploy: $REPO_ROOT/config/alacritty/alacritty.toml + shell wsl.exe --distribution FedoraLinux-44 -> $appdata/alacritty/alacritty.toml"
+}
+
+@test "outside WSL: no Alacritty config for Windows" {
+  plan_for desktop WITH_DESKTOP=0
+  [ "$status" -eq 0 ]
+  refute_match alacritty
 }

@@ -10,6 +10,8 @@ source "$(dirname "${BASH_SOURCE[0]}")/../lib.sh"
 # shellcheck source=installer/detect.sh
 source "$(dirname "${BASH_SOURCE[0]}")/../detect.sh"
 
+has_flag WITH_DESKTOP || exit 0
+
 BUILD_TIMEOUT=1200 # seconds
 
 # wait_for_kmod — akmod-nvidia builds the module in the background after

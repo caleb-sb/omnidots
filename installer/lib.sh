@@ -5,7 +5,8 @@
 #
 # Dry-run: with DRY_RUN=1 nothing is executed. Every action prints one plan
 # line to stdout instead, as `<kind>: <detail>` (flag, conf, repo, pkg, swap,
-# backup, link, run, wait, gpu-order, flatpak for a Flathub app ID, ask for a
+# backup, link, run, wait, gpu-order, profile for the profile install.sh
+# records, flatpak for a Flathub app ID, ask for a
 # command the real run offers and the user can skip, release for an upstream
 # release to install: `<name> <version> <url>`, an rpm dnf installs, or with
 # `-> <path>` a binary or unpacked tarball put there, current for one
@@ -26,6 +27,23 @@ LOCAL_BIN="$HOME/.local/bin"
 # shellcheck disable=SC2034 # read by 85-android.sh and update.sh
 ANDROID_STUDIO_DIR="${OMNIDOTS_OPT_DIR:-/opt}/android-studio"
 : "${DRY_RUN:=0}"
+
+# Where install.sh records the machine's profile, so update.sh and a module
+# run on its own do the same as the install did.
+PROFILE_FILE="${XDG_STATE_HOME:-$HOME/.local/state}/omnidots/profile"
+
+# WITH_DESKTOP: 1 for the Hyprland desktop, 0 for a terminal-only machine
+# (install.sh --terminal). Unless set, it's the recorded profile, and the
+# desktop when none is recorded.
+if [[ -z ${WITH_DESKTOP:-} ]]; then
+  WITH_DESKTOP=1
+  if [[ -r $PROFILE_FILE && $(<"$PROFILE_FILE") == terminal ]]; then
+    WITH_DESKTOP=0
+  fi
+fi
+
+# is_wsl — true inside WSL, which sets WSL_DISTRO_NAME in every shell.
+is_wsl() { [[ -n ${WSL_DISTRO_NAME:-} ]]; }
 
 log_info() { printf '\e[36m[info]\e[0m %s\n' "$*" >&2; }
 log_warn() { printf '\e[33m[warn]\e[0m %s\n' "$*" >&2; }

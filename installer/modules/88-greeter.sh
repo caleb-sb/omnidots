@@ -21,6 +21,8 @@ set -euo pipefail
 # shellcheck source=installer/lib.sh
 source "$(dirname "${BASH_SOURCE[0]}")/../lib.sh"
 
+has_flag WITH_DESKTOP || exit 0
+
 # As root, the greeter would log in root, with root's wallpaper (none).
 [[ $EUID -ne 0 ]] || die "Run this as your user, not root; it uses sudo where needed."
 

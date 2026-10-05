@@ -6,6 +6,8 @@ set -euo pipefail
 # shellcheck source=installer/lib.sh
 source "$(dirname "${BASH_SOURCE[0]}")/../lib.sh"
 
+has_flag WITH_DESKTOP || exit 0
+
 FLATHUB_REPO_URL=https://dl.flathub.org/repo/flathub.flatpakrepo
 
 APPS=(

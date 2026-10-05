@@ -4,3 +4,6 @@ config/hypr/openwhispr-binds.conf
 
 # Per-machine Hyprland overrides (see config/hypr/override.example.lua).
 config/hypr/override.lua
+
+# Per-machine git settings (see config/git/config).
+config/git/config.local

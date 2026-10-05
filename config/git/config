@@ -6,3 +6,8 @@
   name = "Caleb"
 [init]
 	defaultBranch = main
+
+# Per-machine settings, like a work user.email, go in ~/.config/git/config.local
+# (gitignored). Later settings win, and a missing file is ignored.
+[include]
+  path = ~/.config/git/config.local

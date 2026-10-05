@@ -35,8 +35,8 @@ EOF
 }
 
 update() {
-  run --separate-stderr env -u WITH_ANDROID \
-    OMNIDOTS_RELEASES_DIR="$FIXTURES/releases" \
+  run --separate-stderr env -u WITH_ANDROID -u WITH_DESKTOP -u WSL_DISTRO_NAME \
+    -u XDG_STATE_HOME OMNIDOTS_RELEASES_DIR="$FIXTURES/releases" \
     OMNIDOTS_OPT_DIR="$BATS_TEST_TMPDIR/opt" PATH="$STUBS:$PATH" \
     "$REPO_ROOT/update.sh" "$@"
 }
@@ -255,4 +255,30 @@ theme_asset() {
   update --bogus
   [ "$status" -eq 1 ]
   [ -z "$output" ]
+}
+
+# terminal_profile — a machine install.sh set up with --terminal.
+terminal_profile() {
+  mkdir -p "$HOME/.local/state/omnidots"
+  echo terminal >"$HOME/.local/state/omnidots/profile"
+}
+
+@test "terminal-only machine: starship and lazygit, no desktop rpms, themes or fonts" {
+  terminal_profile
+  update --dry-run
+  [ "$status" -eq 0 ]
+  assert_line "release: starship 1.26.0 https://github.com/starship/starship/releases/download/v1.26.0/starship-x86_64-unknown-linux-musl.tar.gz -> $HOME/.local/bin/starship"
+  assert_line "release: lazygit 0.65.1 https://github.com/jesseduffield/lazygit/releases/download/v0.65.1/lazygit_0.65.1_linux_x86_64.tar.gz -> $HOME/.local/bin/lazygit"
+  refute_match 'open-whispr|proton|tela|bibata|tokyonight|nerd-font|material|fc-cache'
+}
+
+@test "under WSL: copies the Alacritty config to Windows again" {
+  terminal_profile
+  run --separate-stderr env WSL_DISTRO_NAME=FedoraLinux-44 \
+    OMNIDOTS_APPDATA="$BATS_TEST_TMPDIR/appdata" \
+    OMNIDOTS_RELEASES_DIR="$FIXTURES/releases" \
+    OMNIDOTS_OPT_DIR="$BATS_TEST_TMPDIR/opt" PATH="$STUBS:$PATH" \
+    "$REPO_ROOT/update.sh" --dry-run
+  [ "$status" -eq 0 ]
+  assert_line "deploy: $REPO_ROOT/config/alacritty/alacritty.toml + shell wsl.exe --distribution FedoraLinux-44 -> $BATS_TEST_TMPDIR/appdata/alacritty/alacritty.toml"
 }

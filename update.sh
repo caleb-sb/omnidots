@@ -3,6 +3,8 @@
 # Refreshes everything that doesn't come from a dnf repo, skipping anything
 # already at its latest release or, for themes, its pinned version. Android
 # Studio is refreshed only when it's installed in /opt; this never installs it.
+# A terminal-only machine (install.sh --terminal) gets starship and lazygit
+# only, and under WSL the Alacritty config is copied to Windows again.
 #
 # Usage: ./update.sh [--dry-run]
 #   --dry-run  print the plan to stdout, one action per line, and change nothing
@@ -16,6 +18,7 @@ source installer/lib.sh
 # The installer runs these modules too, for the first install.
 MODULES=(
   installer/modules/35-theme-assets.sh
+  installer/modules/36-wsl-alacritty.sh
   installer/modules/80-releases.sh
   installer/modules/85-android.sh
 )
@@ -24,7 +27,7 @@ for arg in "$@"; do
   case "$arg" in
     --dry-run) DRY_RUN=1 ;;
     -h | --help)
-      sed -n '3,7s/^# \{0,1\}//p' "${BASH_SOURCE[0]##*/}"
+      sed -n '3,9s/^# \{0,1\}//p' "${BASH_SOURCE[0]##*/}"
       exit 0
       ;;
     *) die "Unknown argument: $arg" ;;

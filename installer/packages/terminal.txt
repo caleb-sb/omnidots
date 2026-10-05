@@ -1,0 +1,39 @@
+# Packages every machine gets, terminal-only ones included. One per line; `#`
+# starts a comment.
+#
+# starship and lazygit come from GitHub releases (80-releases.sh), and pnpm,
+# bun and Claude Code from their own installers (70-dev-tools.sh).
+
+# Shell and editor
+bat
+fish
+fzf
+less
+nano
+neovim
+tmux
+tree
+
+# CLI tools
+curl
+gawk
+git
+gzip                  # for tar, on .tar.gz releases
+jq                    # reads Proton's release lists
+openssl
+parallel
+procps-ng             # ps and top; WSL's Fedora image lacks them
+ripgrep
+tar                   # unpacks the starship and lazygit releases
+unzip
+wget2
+which
+xz                    # for tar, on .tar.xz releases
+
+# Development (70-dev-tools.sh installs the rest)
+gcc                   # the linker Rust needs, and Neovim builds treesitter parsers
+make
+golang
+rustup                # rustup-init; 70-dev-tools.sh runs it
+python3
+gh

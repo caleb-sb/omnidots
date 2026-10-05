@@ -16,6 +16,8 @@ set -euo pipefail
 # shellcheck source=installer/lib.sh
 source "$(dirname "${BASH_SOURCE[0]}")/../lib.sh"
 
+has_flag WITH_DESKTOP || exit 0
+
 # Pins. Bump one to have the next run or update.sh install it.
 TELA_ICONS_TAG=2026-07-07                 # vinceliuice/Tela-circle-icon-theme
 BIBATA_TAG=v2.0.7                         # ful1e5/Bibata_Cursor

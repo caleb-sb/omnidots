@@ -1,8 +1,9 @@
-# Packages every machine gets. One per line; `#` starts a comment.
+# Packages every desktop gets, on top of terminal.txt. One per line; `#`
+# starts a comment.
 #
 # GPU drivers and the Bluetooth, backlight and battery packages live in their
-# own capability lists. starship and lazygit come from GitHub releases. Brave,
-# Chrome and Proton VPN come from the vendor repos 10-repos.sh adds.
+# own capability lists. Brave, Chrome and Proton VPN come from the vendor repos
+# 10-repos.sh adds.
 
 # Hyprland session
 hyprland
@@ -16,15 +17,7 @@ xdg-desktop-portal-hyprland
 xdg-desktop-portal-gtk
 
 # Terminal
-bat
-fish
-fzf
 kitty
-less
-nano
-neovim
-tmux
-tree
 
 # Desktop utilities
 rofi                  # launcher and clipboard picker
@@ -66,26 +59,9 @@ pipewire-alsa
 pipewire-utils
 
 # CLI tools
-curl
-gawk
-gzip                  # for tar, on .tar.gz releases
 ImageMagick
-jq                    # reads Proton Mail's release list
-openssl
-parallel
 pciutils              # lspci, for hardware detection
-ripgrep
-tar                   # unpacks the starship and lazygit releases
-xz                    # for tar, on the Bibata cursors and Nerd Font
-unzip
 usbutils
-wget2
-
-# Development (70-dev-tools.sh installs the rest)
-golang
-rustup                # rustup-init; 70-dev-tools.sh runs it
-python3
-gh
 
 # Apps
 brave-browser

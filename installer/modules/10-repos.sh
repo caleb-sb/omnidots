@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 #
-# dnf settings and third-party repositories.
+# dnf settings and third-party repositories. A terminal-only machine gets
+# only Docker's.
 #
 # Input, overridable so tests get a fixed Fedora release:
 #   OMNIDOTS_OS_RELEASE  os-release file (default: /etc/os-release)
@@ -113,11 +114,15 @@ unset_dnf_option fastestmirror
 # is the dnf4 package).
 install_packages dnf5-plugins
 
-enable_rpmfusion
-for copr in "${COPRS[@]}"; do
-  enable_copr "$copr"
-done
-add_repo_file brave-browser "$BRAVE_REPO_URL"
-enable_google_chrome
+if has_flag WITH_DESKTOP; then
+  enable_rpmfusion
+  for copr in "${COPRS[@]}"; do
+    enable_copr "$copr"
+  done
+  add_repo_file brave-browser "$BRAVE_REPO_URL"
+  enable_google_chrome
+fi
 add_repo_file docker-ce "$DOCKER_REPO_URL"
-enable_protonvpn
+if has_flag WITH_DESKTOP; then
+  enable_protonvpn
+fi

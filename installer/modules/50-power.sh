@@ -9,6 +9,8 @@ set -euo pipefail
 # shellcheck source=installer/lib.sh
 source "$(dirname "${BASH_SOURCE[0]}")/../lib.sh"
 
+has_flag WITH_DESKTOP || exit 0
+
 PERFORMANCE_PROFILE=throughput-performance
 
 log_info "Setting up the CPU power profile"

@@ -58,6 +58,56 @@ akmods signing key and queues it with `mokutil --import`, which asks for a
 one-time password. At the next boot, choose Enroll MOK in the blue MOK
 manager and enter that password, or the NVIDIA module won't load.
 
+## Terminal-only machines (WSL)
+
+```sh
+./install.sh --terminal            # the terminal setup, no desktop
+./install.sh --terminal --dry-run  # print the plan only
+```
+
+`--terminal` installs just the shell, editor and dev tools, on any Fedora,
+including a fresh Fedora WSL distro. There's no hardware detection and no
+optional modules. It installs:
+
+- the packages in `installer/packages/terminal.txt`: fish, Neovim, tmux, the
+  CLI tools, gcc, Go, rustup, Python and gh. Every desktop gets these too.
+- Docker CE from Docker's repo, the only repo it adds
+- rustup's toolchain, pnpm with Node, bun and Claude Code
+- starship and lazygit from their releases
+
+It links only `fish`, `git`, `nvim`, `starship.toml` and `tmux` into
+`~/.config`, and makes fish the login shell. The desktop's login shell is left
+alone.
+
+The installer records the profile in `~/.local/state/omnidots/profile`, so
+`./update.sh`, a plain `./install.sh` and modules run on their own keep it.
+`WITH_DESKTOP=1 ./install.sh` switches a machine to the desktop.
+
+Under WSL:
+
+- Docker needs systemd, so the installer stops before changing anything if
+  systemd isn't running. Add `[boot]` `systemd=true` to `/etc/wsl.conf`, run
+  `wsl --shutdown` from Windows, and run it again.
+- Alacritty on Windows gets `config/alacritty/alacritty.toml`, with a shell
+  that opens this distro in fish at home. It's written to
+  `%APPDATA%\alacritty\alacritty.toml` as a copy, because Windows Alacritty
+  can't follow a link into WSL. `./update.sh` copies it again after you change
+  it. An `alacritty.toml` there that the installer didn't write is backed up
+  first.
+- Install the JetBrainsMono Nerd Font on Windows yourself. Alacritty draws
+  text with Windows' fonts, so starship's and Neovim's icons need it.
+- Neovim yanks and pastes through the Windows clipboard (`clip.exe` and
+  PowerShell). tmux copies with OSC 52, which Alacritty passes to Windows.
+
+### Per-machine git settings
+
+`config/git/config` includes `~/.config/git/config.local`, which is
+gitignored. Put per-machine settings there, such as a work `user.email`:
+
+```sh
+git config -f ~/.config/git/config.local user.email me@work.example
+```
+
 ## Login screen
 
 The machine boots to the graphical target and greetd, which runs a Quickshell
@@ -146,7 +196,8 @@ Layout:
   check, dry-run, upstream release install
 - `installer/detect.sh`: capability detection
 - `installer/modules/NN-*.sh`: one job each, run in order
-- `installer/packages/*.txt`: package lists, one package per line, `#` comments
+- `installer/packages/*.txt`: package lists, one package per line, `#`
+  comments. `terminal.txt` is for every machine, `desktop.txt` for every desktop.
 
 ## Dotfiles
 
@@ -165,7 +216,8 @@ real file or directory in the way is moved to `<name>.bak.<YYYYMMDD-HHMMSS>`
 first.
 
 Files that apps rewrite with machine state are gitignored: fish's
-`fish_variables` and OpenWhispr's `hypr/openwhispr-binds.conf`.
+`fish_variables` and OpenWhispr's `hypr/openwhispr-binds.conf`. So is
+`git/config.local`, for per-machine git settings.
 
 ### Per-machine Hyprland settings
 

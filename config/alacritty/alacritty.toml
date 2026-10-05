@@ -1,0 +1,59 @@
+# Alacritty, used on Windows to reach WSL. Under WSL, the installer copies this
+# to %APPDATA%\alacritty\alacritty.toml (Alacritty can't follow a link into
+# WSL) with a [terminal.shell] that starts the distro; see
+# installer/modules/36-wsl-alacritty.sh. Font and colors match kitty.
+
+[font]
+normal = { family = "JetBrainsMono Nerd Font" }
+size = 14
+
+[window]
+padding = { x = 4, y = 4 }
+
+[scrolling]
+history = 10000
+
+[bell]
+duration = 0
+
+# Tokyo Night Night, from folke/tokyonight.nvim's kitty theme
+# (config/kitty/themes/tokyonight_night.conf).
+[colors.primary]
+background = "#1a1b26"
+foreground = "#c0caf5"
+
+[colors.cursor]
+cursor = "#c0caf5"
+text = "#1a1b26"
+
+[colors.selection]
+background = "#283457"
+foreground = "#c0caf5"
+
+[colors.normal]
+black = "#15161e"
+red = "#f7768e"
+green = "#9ece6a"
+yellow = "#e0af68"
+blue = "#7aa2f7"
+magenta = "#bb9af7"
+cyan = "#7dcfff"
+white = "#a9b1d6"
+
+[colors.bright]
+black = "#414868"
+red = "#ff899d"
+green = "#9fe044"
+yellow = "#faba4a"
+blue = "#8db0ff"
+magenta = "#c7a9ff"
+cyan = "#a4daff"
+white = "#c0caf5"
+
+[[colors.indexed_colors]]
+index = 16
+color = "#ff9e64"
+
+[[colors.indexed_colors]]
+index = 17
+color = "#db4b4b"
